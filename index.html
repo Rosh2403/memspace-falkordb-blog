@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Memspace Engineering — One Graph, One Source of Truth</title>
+<style>
+:root{color-scheme:light;--bg:#f7f8f6;--paper:#ffffff;--ink:#17221d;--muted:#5e6c64;--line:#dce5de;--fill:#edf4ee;--accent:#12724a;--accent2:#d6f2e1;--code-bg:#13231c;--code-ink:#e6f8ed;--mono:ui-monospace,"SFMono-Regular",Consolas,monospace;--sans:Inter,"Segoe UI",system-ui,sans-serif;--serif:Georgia,"Iowan Old Style",serif}
+@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0e1511;--paper:#152019;--ink:#eff6ef;--muted:#acc2b2;--line:#2b4534;--fill:#1d3427;--accent:#81d8a4;--accent2:#244b32;--code-bg:#0a120e;--code-ink:#def5e4}}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:2rem}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.78 var(--sans);-webkit-font-smoothing:antialiased}a{color:var(--accent);text-underline-offset:3px}a:hover{text-decoration-thickness:2px}a:focus-visible{outline:3px solid var(--accent);outline-offset:4px} .topbar{border-bottom:1px solid var(--line);background:var(--paper)}.topbar-inner{max-width:1160px;margin:auto;padding:1rem 1.6rem;display:flex;justify-content:space-between;align-items:center;gap:1rem}.brand{font-size:.95rem;font-weight:800;letter-spacing:-.03em;color:var(--ink);text-decoration:none}.brand-mark{background:var(--accent);color:var(--paper);display:inline-grid;place-items:center;width:29px;height:29px;border-radius:9px;margin-right:.55rem}.top-links{display:flex;gap:1.25rem}.top-links a{font-size:.8rem;font-weight:700;text-decoration:none;color:var(--muted)}.layout{max-width:1160px;display:grid;grid-template-columns:210px minmax(0,1fr);gap:3.5rem;margin:auto;padding:0 1.6rem}.toc{align-self:start;position:sticky;top:2rem;padding-top:3.5rem}.toc-title{font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:var(--muted);margin:0 0 .9rem}.toc a{display:block;border-left:2px solid var(--line);padding:.36rem .7rem;font-size:.78rem;line-height:1.4;text-decoration:none;color:var(--muted)}.toc a:hover,.toc a:focus{border-color:var(--accent);color:var(--accent)}article{min-width:0;max-width:800px;padding:3.25rem 0 6rem}header{margin-bottom:2.2rem}.kicker{font-size:.73rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--accent);margin:0 0 1rem}.reading-time{color:var(--muted);font-weight:500}h1{font-size:clamp(2.4rem,4.7vw,4rem);line-height:1.13;letter-spacing:-.055em;font-weight:800;margin:0 0 1.1rem}h2{font-size:clamp(1.48rem,2.3vw,1.85rem);line-height:1.28;letter-spacing:-.035em;margin:3.5rem 0 1rem;padding-top:.45rem}h3{font-size:1.12rem;line-height:1.4;margin:2rem 0 .65rem;letter-spacing:-.015em}.deck{color:var(--muted);font-size:1.17rem;line-height:1.6;margin:0 0 1.15rem;max-width:44rem}.intro-meta{font-size:.8rem;color:var(--muted);font-weight:600}.intro-meta span+span:before{content:'•';padding:0 .7rem}p{margin:0 0 1.15rem}article>p:not(.note){max-width:72ch}strong{font-weight:750}code{font-family:var(--mono);font-size:.82em;background:var(--fill);border-radius:5px;padding:.13em .33em;overflow-wrap:anywhere}pre{margin:1.1rem 0 1.65rem;padding:1.2rem 1.35rem;color:var(--code-ink);background:var(--code-bg);border-radius:12px;overflow:auto;font:13px/1.75 var(--mono);border:1px solid var(--line)}pre code{background:none;padding:0;font:inherit;color:inherit;overflow-wrap:normal}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:2rem 0 2.2rem}.stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:1.2rem 1rem;box-shadow:0 4px 14px #08251606}.stat b{display:block;font-size:1.7rem;line-height:1.12;letter-spacing:-.045em;color:var(--accent)}.stat span{display:block;margin-top:.45rem;font-size:.75rem;font-weight:600;line-height:1.5;color:var(--muted)}.note{background:var(--fill);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:1.1rem 1.2rem;margin:1.4rem 0 1.5rem;font-size:.95rem}.split{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin:1.2rem 0 1.8rem}.card{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:1.3rem;font-size:.9rem}.card h3{margin:0 0 .6rem}.card p{margin:0}.graph{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:1.3rem;overflow:auto;margin:1rem 0 1.6rem}.nodes{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem}.node{border:1px solid var(--line);border-radius:7px;background:var(--fill);font:700 12px/1.2 var(--mono);padding:.58rem .75rem;white-space:nowrap}.edge{color:var(--accent);font:700 11px/1.3 var(--mono)}.caption{font-size:.73rem;color:var(--muted);margin:.8rem 0 0}.table-wrap{max-width:100%;overflow-x:auto;margin:1rem 0 1.6rem;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:.84rem;line-height:1.55;margin:0}th,td{text-align:left;padding:.8rem .9rem;vertical-align:top;border-bottom:1px solid var(--line)}tr:last-child td{border-bottom:0}thead{background:var(--fill)}th{font-weight:800;color:var(--muted);font-size:.73rem;text-transform:uppercase;letter-spacing:.06em}ol{padding-left:1.45rem}li{padding-left:.15rem;margin:.42rem 0}footer{border-top:1px solid var(--line);padding-top:1.35rem;margin-top:3.5rem;color:var(--muted);font-size:.82rem}.architecture{border:1px solid var(--line);border-radius:15px;padding:1.3rem;background:var(--paper);margin:1.7rem 0}.architecture h2{font-size:1.1rem;margin:0 0 .4rem;padding:0}.architecture p{font-size:.82rem;color:var(--muted);margin-bottom:1rem}.arch-flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.5rem;align-items:center}.arch-step{background:var(--fill);border:1px solid var(--line);border-radius:10px;text-align:center;padding:.85rem .35rem;font-size:.75rem;font-weight:800}.arch-step small{display:block;font-size:.68rem;font-weight:500;color:var(--muted);margin-top:.3rem;line-height:1.4}.arch-arrow{color:var(--accent);font-weight:800}.section-rule{height:1px;background:var(--line);margin:2rem 0}.skip-link{position:absolute;left:-999px;top:0;background:var(--paper);padding:.5rem}.skip-link:focus{left:10px;z-index:10}@media(max-width:900px){.layout{grid-template-columns:1fr;gap:0}.toc{display:none}article{margin:auto;padding-top:2.5rem}}@media(max-width:590px){.topbar-inner{padding:.85rem 1rem}.layout{padding:0 1.05rem}.top-links{gap:.7rem}.top-links a{font-size:.7rem}article{padding-top:2rem}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}.split{grid-template-columns:1fr}.arch-flow{grid-template-columns:1fr}.arch-arrow{transform:rotate(90deg);text-align:center}h1{font-size:2.5rem}body{font-size:16px}pre{font-size:11.5px}}
+
+/* Memspace / dark futuristic editorial system — original styling inspired by contemporary AI landing pages. */
+:root{color-scheme:dark;--bg:#07090e;--paper:#111521;--ink:#f4f7ff;--muted:#9ca6bd;--line:#30374b;--fill:#191f30;--accent:#a69aff;--accent2:#252246;--code-bg:#0b0f1a;--code-ink:#d8e8ff;--sans:Inter,"Segoe UI",system-ui,sans-serif}
+@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#07090e;--paper:#111521;--ink:#f4f7ff;--muted:#9ca6bd;--line:#30374b;--fill:#191f30;--accent:#a69aff;--accent2:#252246;--code-bg:#0b0f1a;--code-ink:#d8e8ff}}
+html{scroll-padding-top:5.5rem}body{background:radial-gradient(ellipse 750px 420px at 71% 5%,#3730804f,transparent 80%),radial-gradient(ellipse 650px 600px at -10% 25%,#162b4833,transparent 80%),#07090e;color:var(--ink);font-size:16px;line-height:1.8}body:before{content:"";pointer-events:none;position:fixed;inset:0;z-index:-1;background-image:linear-gradient(#ffffff04 1px,transparent 1px),linear-gradient(90deg,#ffffff04 1px,transparent 1px);background-size:75px 75px;mask-image:linear-gradient(to bottom,#0006,transparent 75%)}
+.topbar{position:sticky;top:0;z-index:20;background:#090c15e8;border-bottom:1px solid #ffffff1d;backdrop-filter:blur(22px)}.topbar-inner{max-width:1380px;padding:1.05rem 2rem}.brand{color:white;font-size:1.05rem;letter-spacing:-.055em}.brand-mark{background:linear-gradient(135deg,#8d84ff,#61d4fd);color:#050612;border-radius:50%;width:31px;height:31px;box-shadow:0 0 22px #8f81ff77}.top-links a{color:#c4c9d7;letter-spacing:.02em}.top-links a:hover{color:white}
+.layout{max-width:1380px;grid-template-columns:225px minmax(0,1fr);gap:4.5rem;padding:0 2rem}.toc{top:7.5rem;padding-top:3.5rem}.toc-title{color:#9b8df5;letter-spacing:.22em}.toc a{border-color:#30374b;padding:.48rem .85rem;font-size:.76rem}.toc a:hover,.toc a:focus{background:#a69aff0b;color:#d2caff}
+article{max-width:940px;padding:0 0 7rem}.hero-wrap{position:relative;isolation:isolate;min-height:590px;padding:6.5rem 0 4rem;display:flex;align-items:center;overflow:hidden}.hero-wrap header{position:relative;z-index:2;width:100%;max-width:780px;margin:0}.hero-art{position:absolute;right:-215px;top:36px;width:600px;height:600px;pointer-events:none;opacity:.88;z-index:-1;filter:drop-shadow(0 0 80px #755fee3f)}.hero-art .orb{position:absolute;inset:110px;border-radius:50%;background:radial-gradient(circle at 30% 28%,#eff8ff,#9c8bff 18%,#504bbf 42%,#171943 64%,#090b15 73%);box-shadow:inset -20px -30px 55px #030513,0 0 90px #7974ff77;transform:rotate(-22deg)}.hero-art .ring{position:absolute;inset:72px;border:1px solid #a8a4ff66;border-radius:50%;transform:rotateX(68deg) rotate(-35deg);box-shadow:0 0 18px #beb9ff66}.hero-art .ring.two{inset:30px;transform:rotateY(65deg) rotate(32deg);border-color:#6dd4fe80}.hero-art .ring.three{inset:5px;border-style:dashed;border-color:#e9e4ff44;transform:rotate(40deg)}
+.kicker{font-size:.75rem;letter-spacing:.25em;color:#b9aafa;margin-bottom:1.65rem}h1{font-size:clamp(3rem,5.9vw,5.65rem);line-height:1.04;letter-spacing:-.075em;font-weight:750;margin-bottom:1.7rem;text-wrap:balance;max-width:800px;text-shadow:0 12px 70px #0008}h1 em{font-style:normal;background:linear-gradient(110deg,#fff,#ab9bff 50%,#75dafa);background-clip:text;-webkit-background-clip:text;color:transparent}.deck{font-size:1.2rem;line-height:1.66;color:#b8c1d2;max-width:620px}.intro-meta{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:#a9b0c5;margin-top:1.65rem}
+h2{font-size:clamp(1.75rem,2.8vw,2.4rem);font-weight:700;letter-spacing:-.05em;margin-top:4.9rem;margin-bottom:1.1rem}h3{font-size:1.24rem;letter-spacing:-.025em}p{color:#c0c7d7}p strong{color:#fff}a{color:#b9abff}a:hover{color:#e3ddff}.stats{margin:0 0 2.8rem;gap:1px;border:1px solid #353950;border-radius:20px;overflow:hidden;background:#353950}.stat{background:linear-gradient(155deg,#181d30,#101421);border:0;border-radius:0;box-shadow:none;padding:1.65rem}.stat b{font-size:2.3rem;color:#fff;letter-spacing:-.06em}.stat span{color:#a6b0c4;font-size:.71rem;text-transform:uppercase;letter-spacing:.055em}
+.architecture{padding:2rem;background:linear-gradient(145deg,#171a30,#101522);border:1px solid #343657;border-radius:22px}.architecture h2{font-size:1.15rem;color:#fff}.architecture .arch-step{background:#0b1020;border-color:#3e4565;border-radius:14px;padding:1.15rem .3rem;font-size:.8rem}.arch-arrow{color:#a69aff}.note{background:#211c39;border:1px solid #4d4675;border-left:4px solid #ad9cfc;border-radius:13px;padding:1.45rem}.card,.graph{background:linear-gradient(150deg,#171b2b,#101521);border-color:#363a53;border-radius:18px;padding:1.55rem}.node{background:#23243b;border-color:#57517c;color:#eceaff;border-radius:9px;padding:.65rem .9rem}.edge{color:#b0a1ff}pre{background:#090d17;border-color:#353951;border-radius:16px;padding:1.55rem;box-shadow:inset 0 1px #ffffff08}.table-wrap{border-color:#34394d;border-radius:16px}thead{background:#232338}th,td{border-color:#34394d}tbody tr:nth-child(odd){background:#ffffff04}th{color:#bec1e3}footer{border-color:#34394d}.caption{color:#9ba3bb}.section-rule{background:#34394d}
+.reveal{animation:rise .7s both}@keyframes rise{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){.reveal{animation:none}html{scroll-behavior:auto}}@media(max-width:900px){.layout{grid-template-columns:1fr;gap:0}.hero-wrap{min-height:490px;padding:5rem 0 3rem}.hero-art{right:-270px;opacity:.5}}@media(max-width:590px){.topbar-inner{padding:.85rem 1.1rem}.layout{padding:0 1.1rem}.hero-wrap{min-height:490px;padding:4rem 0 3rem}.hero-art{right:-370px;top:25px;opacity:.35}h1{font-size:clamp(2.9rem,12vw,4.2rem)}.deck{font-size:1.05rem}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}.arch-flow{grid-template-columns:1fr}.split{grid-template-columns:1fr}}
+/* Editorial card treatment: quiet surfaces, precise dividers, no gradient panels. */
+.stats{gap:0;border:0;border-top:1px solid #3a4050;border-bottom:1px solid #3a4050;border-radius:0;background:transparent;margin:0 0 3rem;overflow:visible}
+.stat{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:1.35rem 1.6rem 1.35rem 0}
+.stat+.stat{border-left:1px solid #3a4050!important;padding-left:1.6rem}
+.stat b{font-size:2rem;font-weight:650;letter-spacing:-.045em;color:#f5f6f9}
+.stat span{font-size:.74rem;text-transform:none;letter-spacing:0;color:#a4adbe;font-weight:500;margin-top:.3rem}
+.architecture,.card,.graph{background:#0c1019!important;border:1px solid #313745!important;border-radius:3px!important;box-shadow:none!important}
+.architecture{padding:1.6rem 1.8rem}
+.architecture .arch-step{background:transparent!important;border:1px solid #3b4352!important;border-radius:2px!important;padding:1.1rem .6rem;font-weight:600}
+.arch-arrow{color:#8c95ab}
+.split{gap:0;border-top:1px solid #343b49;border-bottom:1px solid #343b49;margin:1.4rem 0 1.9rem}
+.split .card{background:transparent!important;border:0!important;border-radius:0!important;padding:1.5rem 1.6rem 1.5rem 0}
+.split .card+.card{border-left:1px solid #343b49!important;padding-left:1.6rem}
+.card h3{font-size:1.07rem;font-weight:650;letter-spacing:-.02em;margin:0 0 .7rem}
+.card p{color:#aeb7c6;font-size:.91rem}
+.graph{padding:1.3rem 1.4rem;margin:1rem 0 1.6rem}
+.node{background:transparent!important;border:1px solid #515869!important;border-radius:2px!important;color:#e5e9f3;font-size:11px;font-weight:550;padding:.52rem .65rem}
+.edge{color:#9eacc7;font-weight:500}
+.note{background:transparent!important;border:0!important;border-left:2px solid #8c8fb4!important;border-radius:0!important;padding:.4rem 0 .4rem 1.25rem}
+.table-wrap{border:1px solid #303747;border-radius:2px}
+thead{background:#151b27}tbody tr:nth-child(odd){background:transparent}tbody tr:hover{background:#ffffff05}
+pre{border-radius:3px;box-shadow:none}
+@media(max-width:590px){.stat+.stat{padding-left:1rem}.stat{padding-right:.8rem}.stat:last-child{border-left:0!important;border-top:1px solid #343b49!important;padding-left:0}.split .card+.card{border-left:0!important;border-top:1px solid #343b49!important;padding-left:0}.split .card{padding-right:0}}
+
+</style>
+<meta content="#07090e" name="theme-color"/></head>
+<body><a class="skip-link" href="#main">Skip to content</a><div class="topbar"><div class="topbar-inner"><a class="brand" href="#main"><span class="brand-mark">M</span>memspace / engineering</a><div class="top-links"><a href="https://docs.falkordb.com" rel="noopener noreferrer" target="_blank">FalkorDB docs ↗</a><a href="#what-this-choice-bought-and-what-it-did-not">Trade-offs ↓</a></div></div></div>
+<main class="layout" id="main"><nav aria-label="On this page" class="toc"><p class="toc-title">On this page</p><a href="#why-a-property-graph-and-why-this-one">Why a property graph, and why this one</a><a href="#two-named-graphs-never-one-mixed-bag">Two named graphs, never one mixed bag</a><a href="#the-schema-is-the-product">A memory is more than a row</a><a href="#authorization-is-a-cypher-pattern-not-a-filter-afterward">Authorization is a Cypher pattern, not a filter afterward</a><a href="#hybrid-retrieval-without-a-second-index-product">Hybrid retrieval without a second index product</a><a href="#the-job-queue-is-also-a-graph">The job queue is also a graph</a><a href="#writes-that-survive-retries-reads-that-survive-revocation">Writes that survive retries, reads that survive revocation</a><a href="#how-the-database-actually-runs">How the database actually runs</a><a href="#what-this-choice-bought-and-what-it-did-not">What this choice bought, and what it did not</a></nav><article>
+<div class="hero-wrap reveal"><div aria-hidden="true" class="hero-art"><div class="ring"></div><div class="ring two"></div><div class="ring three"></div><div class="orb"></div></div><header>
+<p class="kicker">MEMSPACE  /  ENGINEERING</p>
+<h1>One graph. <em>One source of truth.</em> Inside Memspace.</h1>
+<p class="deck">Why we put memories, provenance, permission checks, hybrid search, and even background jobs into FalkorDB—and the trade-offs that came with it.</p>
+<div class="intro-meta"><span>Engineering deep dive</span><span>October 2026</span><span>Architecture &amp; implementation</span></div></header></div>
+<div class="stats">
+<div class="stat"><b>2</b><span>Named graphs per environment</span></div>
+<div class="stat"><b>15</b><span>Application node labels</span></div>
+<div class="stat"><b>768-d</b><span>Gemini vectors in-graph</span></div>
+</div><section aria-label="High level architecture" class="architecture"><h2>The architecture in one glance</h2><p>External services authenticate and derive; FalkorDB remains the durable source of record.</p><div class="arch-flow"><div class="arch-step">MCP clients<small>Remember · revise · recall</small></div><span aria-hidden="true" class="arch-arrow">→</span><div class="arch-step">Memspace API<small>Auth · validation · scoping</small></div><span aria-hidden="true" class="arch-arrow">→</span><div class="arch-step">FalkorDB<small>Graph · search · jobs</small></div></div><p class="caption">Gemini creates embeddings; Clerk provides identity. Neither replaces the graph’s authorization or data model.</p></section>
+<p>Memspace is a personal ontology for assistants that connect over MCP. The interesting part is not that it stores memories. It is that every durable artifact — source text, a structured claim, a frozen share into a space, a search vector, a pending extraction job—is a node or relationship in <a href="https://docs.falkordb.com">FalkorDB</a>. Gemini only produces embeddings. Clerk only authenticates. The graph is the system of record.</p>
+<p class="note"><strong>Why one store.</strong> A separate vector database would introduce another synchronization boundary. Keeping the search indexes and authorization graph in FalkorDB lets retrieval recheck access against current membership before returning a hit—even when an index entry is stale.</p>
+<h2 id="why-a-property-graph-and-why-this-one">Why a property graph, and why this one</h2>
+<p>Everyday personal memory is relational. A preference applies to a topic. A task depends on another task. A claim is supported by a source revision. A share exists only while a person is an active member of a space. Those are walks, not foreign keys you join after retrieval.</p>
+<p>The team looked at Graphiti and Mem0 as design precedents for hybrid retrieval, then implemented an evidence-backed property graph with a versioned JSON/Zod contract. It is not RDF, OWL, or a reasoner. Schema 1.1 lives in <code>src/ontology.ts</code>. FalkorDB is the runtime: Redis-protocol graph with parameterized Cypher, unique constraints, native full-text, and native HNSW vectors, reached through the official <code>falkordb</code> Node client (<code>^6.8.0</code>).</p>
+<p>Vectors never leave that graph. Gemini Embedding 2 (768 dimensions, cosine, normalized) writes <code>vecf32</code> onto <code>KnowledgeSearchDocument</code> nodes. A provider failure leaves the source saved and reports pending indexing. Missing credentials fall back to keyword retrieval. The design does not require Pinecone, a separate Redis search cluster, or an OWL export.</p>
+<h2 id="two-named-graphs-never-one-mixed-bag">Two named graphs, never one mixed bag</h2>
+<p>One FalkorDB server hosts two graphs, selected by name rather than by a second process. Clerk profile sync uses <code>FALKORDB_GRAPH</code> (<code>sandbox_profiles</code> in the sandbox, <code>shared_memory</code> locally). The application graph uses <code>FALKORDB_MEMORY_GRAPH</code> (<code>sandbox_memory</code> / <code>shared_memory_app</code>). User PII and memory content do not share labels.</p>
+<div class="split">
+<div class="card">
+<h3>Profiles graph</h3>
+<p><code>src/users.ts</code>. <code>User</code> nodes keyed by Clerk ID. Unique constraint on <code>clerkId</code>. Delayed webhook updates cannot revive a tombstone: deletion nulls email and name and is terminal for that ID. Health check is <code>RETURN 1 AS ok</code> on a read-only query.</p>
+</div>
+<div class="card">
+<h3>Application graph</h3>
+<p><code>src/memory.ts</code>. Fifteen labels from <code>Person</code> through <code>Publication</code>, each with a range index and a unique <code>id</code> constraint. <code>MemoryStore.init()</code> waits until every constraint is <code>OPERATIONAL</code>. Tests create a unique synthetic graph name and delete it afterward. Hosted sandbox and production graphs are never the test target.</p>
+</div>
+</div>
+<h2 id="the-schema-is-the-product">A memory is more than a row</h2>
+<p>A save is not an INSERT. <code>remember</code> MERGEs a <code>Person</code>, a <code>Memory</code> whose ID is a hash of owner plus idempotency key, a <code>Revision</code>, an <code>OntologyJob</code>, and <code>ABOUT</code> links to <code>Entity</code> nodes. Retrying the same key is a no-op. Changing the payload against a used key is a 409.</p>
+<h3>Source memories</h3>
+<div class="graph">
+<div class="nodes">
+<span class="node">Person</span><span class="edge">AUTHORED →</span>
+<span class="node">Memory</span><span class="edge">HAS_REVISION →</span>
+<span class="node">Revision</span>
+</div>
+<div class="nodes" style="margin-top:0.7rem">
+<span class="node">Memory</span><span class="edge">ABOUT →</span>
+<span class="node">Entity</span>
+<span class="node">Person</span><span class="edge">MEMBER_OF →</span>
+<span class="node">Space</span>
+</div>
+<div class="nodes" style="margin-top:0.7rem">
+<span class="node">Memory</span><span class="edge">SHARED_IN →</span>
+<span class="node">Space</span>
+<span class="node">OntologyJob</span><span class="edge">SUPPORTED_BY →</span>
+<span class="node">Memory</span>
+</div>
+<p class="caption">Source: src/memory.ts</p>
+</div>
+<h3>Structured knowledge</h3>
+<p>Claims stay attributed assertions, not inferred truth.</p>
+<div class="graph">
+<div class="nodes">
+<span class="node">KnowledgeBatch</span><span class="edge">CONTAINS →</span>
+<span class="node">KnowledgeClaim</span><span class="edge">SUPPORTED_BY →</span>
+<span class="node">Memory</span>
+</div>
+<div class="nodes" style="margin-top:0.7rem">
+<span class="node">KnowledgeClaim</span><span class="edge">BASED_ON →</span>
+<span class="node">Revision</span>
+<span class="node">KnowledgeClaim</span><span class="edge">SUBJECT / OBJECT →</span>
+<span class="node">KnowledgeEntity</span>
+</div>
+<div class="nodes" style="margin-top:0.7rem">
+<span class="node">Publication</span><span class="edge">DERIVED_FROM →</span>
+<span class="node">KnowledgeClaim</span>
+</div>
+<p class="caption">Source: src/knowledge.ts</p>
+</div>
+<h3>Sharing and search</h3>
+<p>Each authorized namespace gets its own indexes.</p>
+<div class="graph">
+<div class="nodes">
+<span class="node">Person</span><span class="edge">MEMBER_OF →</span>
+<span class="node">Space</span>
+<span class="node">Publication</span><span class="edge">PUBLISHED_IN →</span>
+<span class="node">Space</span>
+</div>
+<div class="nodes" style="margin-top:0.7rem">
+<span class="node">Publication</span><span class="edge">DERIVED_FROM →</span>
+<span class="node">KnowledgeClaim</span>
+</div>
+<div class="nodes" style="margin-top:0.7rem">
+<span class="node">SearchDocument</span><span class="edge">INDEXES →</span>
+<span class="node">KnowledgeClaim</span>
+<span class="node">SearchDocument</span><span class="edge">INDEXES →</span>
+<span class="node">Publication</span>
+</div>
+<p class="caption">Source: src/knowledge-search.ts</p>
+</div>
+<h3>Labels the application graph actually creates</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Label</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td>Person (app) / User (profiles)</td><td>Account actor vs Clerk profile (separate graphs)</td></tr>
+<tr><td>Memory / Revision</td><td>Source text with compare-and-swap history</td></tr>
+<tr><td>Entity</td><td>Loose ABOUT links from unstructured memories</td></tr>
+<tr><td>KnowledgeEntity / KnowledgeClaim</td><td>Typed ontology 1.1 assertions</td></tr>
+<tr><td>KnowledgeBatch</td><td>Idempotent <code>record_knowledge</code> unit</td></tr>
+<tr><td>Publication</td><td>Frozen selected claim in one space</td></tr>
+<tr><td>KnowledgeSearchDocument</td><td>Scoped full-text + HNSW payload</td></tr>
+<tr><td>Space / Invitation / Change</td><td>Membership, invites, share receipts</td></tr>
+<tr><td>SharingRule / Connection</td><td>Auto-share rules and MCP clients</td></tr>
+<tr><td>OntologyJob</td><td>Durable extraction queue with leases</td></tr>
+</tbody>
+</table></div>
+<h2 id="authorization-is-a-cypher-pattern-not-a-filter-afterward">Authorization is a Cypher pattern, not a filter afterward</h2>
+<p>Membership is not permission to read everything in a space. Private memories stay private unless they are explicitly shared or published. Every read re-checks current edges. The access helper in <code>MemoryStore</code> is the whole policy for unstructured memories:</p>
+<pre><code>OPTIONAL MATCH (m)-[:SHARED_IN {active:true}]-&gt;(:Space)
+  &lt;-[membership:MEMBER_OF {active:true}]-(:Person {id:$user})
+WITH m, count(membership) AS memberships
+WHERE m.deletedAt IS NULL
+  AND (m.owner=$user OR memberships&gt;0)</code></pre>
+<p>Structured knowledge is stricter. A private claim must be owned by the caller, attached to an undeleted source at the current revision, and in <code>active</code> or <code>disputed</code> status. A shared hit walks the other way: <code>Person -MEMBER_OF-&gt; Space &lt;-PUBLISHED_IN- Publication</code>. Publishing copies a frozen projection — excerpt, attribution, entity type and name — and omits private aliases, source memory IDs, and supersession history. Retracting sets <code>Publication.active=false</code>. Retrying a retracted snapshot cannot republish it. Source edits do not mutate a share that already went out.</p>
+<p>Graph expansion is permissioned the same way. Keyword recall seeds authorized memories, then walks <code>ABOUT</code> entities and <code>SHARED_IN</code> spaces — but the same <code>access()</code> clause is applied to every neighbor. One-hop knowledge expansion uses scoped entity IDs, not whole-graph search.</p>
+<h2 id="hybrid-retrieval-without-a-second-index-product">Hybrid retrieval without a second index product</h2>
+<p><code>recall_knowledge</code> reports its own method: FalkorDB full-text plus Gemini vector search, reciprocal-rank fusion, and one-hop scoped entity expansion. Indexes are not global. Each authorized namespace gets its own full-text and vector index on a server-generated label <code>KS_&lt;hash(scope + embedding signature)&gt;</code>. User text never becomes Cypher. Incompatible embedding signatures cannot mix spaces.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Step</th><th>What FalkorDB does</th></tr></thead>
+<tbody>
+<tr><td>1. Scope</td><td>Personal <code>user:…</code> index, plus one <code>space:…</code> index per membership</td></tr>
+<tr><td>2. Lexical</td><td><code>db.idx.fulltext.queryNodes</code> — TF-IDF-style, cap 201 per scope</td></tr>
+<tr><td>3. Semantic</td><td><code>db.idx.vector.queryNodes</code> — HNSW M=16, cosine distance ≤ 0.32, cap 200/100</td></tr>
+<tr><td>4. Guard</td><td>Re-MATCH <code>INDEXES</code> → claim or publication against current membership</td></tr>
+<tr><td>5. Fallback</td><td>If ANN returns fewer than 20 live hits, exact <code>vec.cosineDistance</code> over the scope</td></tr>
+<tr><td>6. Fuse</td><td>Reciprocal-rank fusion, k=60, then bounded one-hop neighbor fetch</td></tr>
+</tbody>
+</table></div>
+<p>Two implementation details are more interesting than the parameter list. First, this pinned FalkorDB build returns cosine <strong>distance</strong> in a procedure column named <code>score</code> — lower is better — so the query aliases it and converts to similarity only after the cutoff. Second, newer FalkorDB images can reorder <code>UNWIND</code> + <code>MERGE</code> result rows when there is no <code>ORDER BY</code>. <code>record_knowledge</code> therefore returns claim IDs in input order rather than row order, so callers still map <code>claimIds[i]</code> to <code>claims[i]</code>.</p>
+<pre><code>CALL db.idx.vector.queryNodes($label,'embedding',200,vecf32($vector))
+YIELD node, score
+MATCH (node)-[:INDEXES]-&gt;(c:KnowledgeClaim)-[:SUPPORTED_BY]-&gt;(m:Memory)
+WHERE c.owner=$user
+  AND c.sourceRevision=m.revision
+  AND c.status IN ['active','disputed']
+  AND m.deletedAt IS NULL
+  AND score &lt;= 0.32
+RETURN c.payload AS payload, score AS distance
+ORDER BY distance, c.id
+LIMIT 100</code></pre>
+<p>A local ten-question regression compared hybrid claim retrieval with the older text-memory path: 10/10 expected sources in the top five hybrid seeds versus 3/10 for text search. That is a small end-to-end fixture check, not evidence of production accuracy. Graph tests separately prove scope isolation, revoked access, old revisions, retraction, idempotence, and forgetting against a real FalkorDB — using synthetic vectors so CI does not need a model key.</p>
+<h2 id="the-job-queue-is-also-a-graph">The job queue is also a graph</h2>
+<p><code>remember</code> and <code>revise_memory</code> create an <code>OntologyJob</code> in the same write as the source revision. OpenRouter (or Gemini) never talks to FalkorDB. The model receives the source, the live domain schema, and a bounded set of that author's private current claims. It has no tools and no write path. Validated plans are stored on the job node so a crashed write retries the same batch input and stable key.</p>
+<p>A worker checks every five seconds for pending jobs whose <code>nextAt</code> has passed, attempts are under five, and any lease has expired. Claiming a job is a Cypher compare-and-set: status pending, lease empty or stale, then set a 120-second lease and increment attempts. Restarts resume eligible work. Forgetting nulls the plan and marks the job forgotten.</p>
+<p>That is why extraction can survive a Railway restart without Redis Streams, Postgres, or an outbox table. The cost is operational: exhausted jobs stay pending with <code>retryScheduled:false</code> for an operator to inspect inside the intended environment — never by printing the private plan.</p>
+<p>Job lifecycle:</p>
+<ol>
+<li><code>pending</code> → lease 120s</li>
+<li><code>structured</code> / <code>no_supported_claims</code></li>
+<li>backoff, cap 5 attempts</li>
+<li>forgotten with the source</li>
+<li>superseded if the revision moved</li>
+</ol>
+<h2 id="writes-that-survive-retries-reads-that-survive-revocation">Writes that survive retries, reads that survive revocation</h2>
+<p>Almost every mutation is MERGE plus a uniqueness constraint plus a hashed retry key. Revisions are compare-and-swap on <code>Memory.revision</code>. Sharing MERGEs <code>SHARED_IN</code> with <code>active:true</code>. Revocation sets <code>MEMBER_OF.active=false</code>; old invitation links cannot turn it back on. Forgetting does not delete the node. It nulls text, evidence, and payloads, deactivates shares, DETACH DELETEs search documents, and removes orphan <code>Entity</code> records. Minimal IDs remain so a replay cannot resurrect content.</p>
+<p>Reads use <code>graph.roQuery</code>. Writes use <code>graph.query</code>. Parameters are always passed as <code>$params</code> — there is no string-built Cypher from user input. The dashboard graph view is a bounded authorized walk (<code>LIMIT 300</code>), rendered with React Flow only after the Ontology tab is opened.</p>
+<h2 id="how-the-database-actually-runs">How the database actually runs</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Environment</th><th>FalkorDB setup</th></tr></thead>
+<tbody>
+<tr><td>Local</td><td>Passworded instance on <code>127.0.0.1:16379</code>, distinct graph names</td></tr>
+<tr><td>GitHub CI</td><td>Pinned <code>falkordb/falkordb-server</code> digest, <code>REDIS_ARGS</code> requirepass, port 16379</td></tr>
+<tr><td>Railway sandbox / production</td><td>Private service, no public endpoint, volume at <code>/var/lib/falkordb/data</code>, AOF</td></tr>
+</tbody>
+</table></div>
+<p>The API service interpolates the FalkorDB private domain and password from Railway service references. <code>/health</code> fails closed with 503 if either graph query fails. Sandbox and production keep separate volumes, passwords, and graph names (<code>sandbox_profiles</code> / <code>sandbox_memory</code>). A code rollback does not undo graph writes.</p>
+<h2 id="what-this-choice-bought-and-what-it-did-not">What this choice bought, and what it did not</h2>
+<p>FalkorDB let Memspace keep one permissioned universe: unstructured memories, typed claims, frozen publications, search documents, and background jobs. Hybrid retrieval stays close to the data, with a small fusion layer instead of a distributed query planner. Tests can spin a uniquely named graph and throw it away.</p>
+<p>It did not buy OWL inference, multi-hop query planning, learned reranking, or a transactional outbox for embeddings. Per-scope indexes isolate neighbors at the cost of administrative overhead as spaces grow. The exact-vector fallback is linear in scope size. Similarity is a relevance signal, never a truth confidence. Claims remain attributed assertions; the database will not decide that two people named Alex are the same person.</p>
+<footer>
+      Primary sources in this repo: <code>src/memory.ts</code>, <code>src/knowledge.ts</code>, <code>src/knowledge-search.ts</code>, <code>src/users.ts</code>, <code>src/ontology-extraction.ts</code>, <code>docs/everyday-memory-research.md</code>, and <code>docs/ontology.md</code>.
+    </footer>
+</article></main>
+</body>
+</html>
