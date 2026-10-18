@@ -1,228 +1,699 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Memspace Engineering — One Graph, One Source of Truth</title>
-<style>
-:root{color-scheme:light;--bg:#f7f8f6;--paper:#ffffff;--ink:#17221d;--muted:#5e6c64;--line:#dce5de;--fill:#edf4ee;--accent:#12724a;--accent2:#d6f2e1;--code-bg:#13231c;--code-ink:#e6f8ed;--mono:ui-monospace,"SFMono-Regular",Consolas,monospace;--sans:Inter,"Segoe UI",system-ui,sans-serif;--serif:Georgia,"Iowan Old Style",serif}
-@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0e1511;--paper:#152019;--ink:#eff6ef;--muted:#acc2b2;--line:#2b4534;--fill:#1d3427;--accent:#81d8a4;--accent2:#244b32;--code-bg:#0a120e;--code-ink:#def5e4}}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:2rem}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.78 var(--sans);-webkit-font-smoothing:antialiased}a{color:var(--accent);text-underline-offset:3px}a:hover{text-decoration-thickness:2px}a:focus-visible{outline:3px solid var(--accent);outline-offset:4px} .topbar{border-bottom:1px solid var(--line);background:var(--paper)}.topbar-inner{max-width:1160px;margin:auto;padding:1rem 1.6rem;display:flex;justify-content:space-between;align-items:center;gap:1rem}.brand{font-size:.95rem;font-weight:800;letter-spacing:-.03em;color:var(--ink);text-decoration:none}.brand-mark{background:var(--accent);color:var(--paper);display:inline-grid;place-items:center;width:29px;height:29px;border-radius:9px;margin-right:.55rem}.top-links{display:flex;gap:1.25rem}.top-links a{font-size:.8rem;font-weight:700;text-decoration:none;color:var(--muted)}.layout{max-width:1160px;display:grid;grid-template-columns:210px minmax(0,1fr);gap:3.5rem;margin:auto;padding:0 1.6rem}.toc{align-self:start;position:sticky;top:2rem;padding-top:3.5rem}.toc-title{font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:var(--muted);margin:0 0 .9rem}.toc a{display:block;border-left:2px solid var(--line);padding:.36rem .7rem;font-size:.78rem;line-height:1.4;text-decoration:none;color:var(--muted)}.toc a:hover,.toc a:focus{border-color:var(--accent);color:var(--accent)}article{min-width:0;max-width:800px;padding:3.25rem 0 6rem}header{margin-bottom:2.2rem}.kicker{font-size:.73rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--accent);margin:0 0 1rem}.reading-time{color:var(--muted);font-weight:500}h1{font-size:clamp(2.4rem,4.7vw,4rem);line-height:1.13;letter-spacing:-.055em;font-weight:800;margin:0 0 1.1rem}h2{font-size:clamp(1.48rem,2.3vw,1.85rem);line-height:1.28;letter-spacing:-.035em;margin:3.5rem 0 1rem;padding-top:.45rem}h3{font-size:1.12rem;line-height:1.4;margin:2rem 0 .65rem;letter-spacing:-.015em}.deck{color:var(--muted);font-size:1.17rem;line-height:1.6;margin:0 0 1.15rem;max-width:44rem}.intro-meta{font-size:.8rem;color:var(--muted);font-weight:600}.intro-meta span+span:before{content:'•';padding:0 .7rem}p{margin:0 0 1.15rem}article>p:not(.note){max-width:72ch}strong{font-weight:750}code{font-family:var(--mono);font-size:.82em;background:var(--fill);border-radius:5px;padding:.13em .33em;overflow-wrap:anywhere}pre{margin:1.1rem 0 1.65rem;padding:1.2rem 1.35rem;color:var(--code-ink);background:var(--code-bg);border-radius:12px;overflow:auto;font:13px/1.75 var(--mono);border:1px solid var(--line)}pre code{background:none;padding:0;font:inherit;color:inherit;overflow-wrap:normal}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:2rem 0 2.2rem}.stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:1.2rem 1rem;box-shadow:0 4px 14px #08251606}.stat b{display:block;font-size:1.7rem;line-height:1.12;letter-spacing:-.045em;color:var(--accent)}.stat span{display:block;margin-top:.45rem;font-size:.75rem;font-weight:600;line-height:1.5;color:var(--muted)}.note{background:var(--fill);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:1.1rem 1.2rem;margin:1.4rem 0 1.5rem;font-size:.95rem}.split{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin:1.2rem 0 1.8rem}.card{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:1.3rem;font-size:.9rem}.card h3{margin:0 0 .6rem}.card p{margin:0}.graph{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:1.3rem;overflow:auto;margin:1rem 0 1.6rem}.nodes{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem}.node{border:1px solid var(--line);border-radius:7px;background:var(--fill);font:700 12px/1.2 var(--mono);padding:.58rem .75rem;white-space:nowrap}.edge{color:var(--accent);font:700 11px/1.3 var(--mono)}.caption{font-size:.73rem;color:var(--muted);margin:.8rem 0 0}.table-wrap{max-width:100%;overflow-x:auto;margin:1rem 0 1.6rem;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:.84rem;line-height:1.55;margin:0}th,td{text-align:left;padding:.8rem .9rem;vertical-align:top;border-bottom:1px solid var(--line)}tr:last-child td{border-bottom:0}thead{background:var(--fill)}th{font-weight:800;color:var(--muted);font-size:.73rem;text-transform:uppercase;letter-spacing:.06em}ol{padding-left:1.45rem}li{padding-left:.15rem;margin:.42rem 0}footer{border-top:1px solid var(--line);padding-top:1.35rem;margin-top:3.5rem;color:var(--muted);font-size:.82rem}.architecture{border:1px solid var(--line);border-radius:15px;padding:1.3rem;background:var(--paper);margin:1.7rem 0}.architecture h2{font-size:1.1rem;margin:0 0 .4rem;padding:0}.architecture p{font-size:.82rem;color:var(--muted);margin-bottom:1rem}.arch-flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.5rem;align-items:center}.arch-step{background:var(--fill);border:1px solid var(--line);border-radius:10px;text-align:center;padding:.85rem .35rem;font-size:.75rem;font-weight:800}.arch-step small{display:block;font-size:.68rem;font-weight:500;color:var(--muted);margin-top:.3rem;line-height:1.4}.arch-arrow{color:var(--accent);font-weight:800}.section-rule{height:1px;background:var(--line);margin:2rem 0}.skip-link{position:absolute;left:-999px;top:0;background:var(--paper);padding:.5rem}.skip-link:focus{left:10px;z-index:10}@media(max-width:900px){.layout{grid-template-columns:1fr;gap:0}.toc{display:none}article{margin:auto;padding-top:2.5rem}}@media(max-width:590px){.topbar-inner{padding:.85rem 1rem}.layout{padding:0 1.05rem}.top-links{gap:.7rem}.top-links a{font-size:.7rem}article{padding-top:2rem}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}.split{grid-template-columns:1fr}.arch-flow{grid-template-columns:1fr}.arch-arrow{transform:rotate(90deg);text-align:center}h1{font-size:2.5rem}body{font-size:16px}pre{font-size:11.5px}}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Dot, Muse and Grok Bot now share one memory · Memspace</title>
+  <meta name="description" content="How we built Memspace for Graph Hacks: one memory every AI assistant can read and write, built on an ontology and FalkorDB.">
+  <link rel="canonical" href="https://memspace-falkordb-blog.vercel.app/">
+  <meta name="theme-color" content="#f4f6f9">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Memspace">
+  <meta property="og:title" content="Dot, Muse and Grok Bot now share one memory">
+  <meta property="og:description" content="How we built Memspace on an ontology and FalkorDB, and what we learned along the way.">
+  <meta property="og:url" content="https://memspace-falkordb-blog.vercel.app/">
+  <meta property="og:image" content="https://memspace-falkordb-blog.vercel.app/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-10-18">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dot, Muse and Grok Bot now share one memory">
+  <meta name="twitter:description" content="How we built Memspace on an ontology and FalkorDB.">
+  <meta name="twitter:image" content="https://memspace-falkordb-blog.vercel.app/assets/og.png">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Dot, Muse and Grok Bot now share one memory",
+    "description": "How we built Memspace on an ontology and FalkorDB, and what we learned along the way.",
+    "datePublished": "2026-10-18",
+    "image": "https://memspace-falkordb-blog.vercel.app/assets/og.png",
+    "author": [
+      {"@type": "Person", "name": "Afshal Gulam"},
+      {"@type": "Person", "name": "Pranav Janakiraman"},
+      {"@type": "Person", "name": "Roshan Premil"}
+    ]
+  }
+  </script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the article</a>
+  <div class="progress" aria-hidden="true"></div>
 
-/* Memspace / dark futuristic editorial system — original styling inspired by contemporary AI landing pages. */
-:root{color-scheme:dark;--bg:#07090e;--paper:#111521;--ink:#f4f7ff;--muted:#9ca6bd;--line:#30374b;--fill:#191f30;--accent:#a69aff;--accent2:#252246;--code-bg:#0b0f1a;--code-ink:#d8e8ff;--sans:Inter,"Segoe UI",system-ui,sans-serif}
-@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#07090e;--paper:#111521;--ink:#f4f7ff;--muted:#9ca6bd;--line:#30374b;--fill:#191f30;--accent:#a69aff;--accent2:#252246;--code-bg:#0b0f1a;--code-ink:#d8e8ff}}
-html{scroll-padding-top:5.5rem}body{background:radial-gradient(ellipse 750px 420px at 71% 5%,#3730804f,transparent 80%),radial-gradient(ellipse 650px 600px at -10% 25%,#162b4833,transparent 80%),#07090e;color:var(--ink);font-size:16px;line-height:1.8}body:before{content:"";pointer-events:none;position:fixed;inset:0;z-index:-1;background-image:linear-gradient(#ffffff04 1px,transparent 1px),linear-gradient(90deg,#ffffff04 1px,transparent 1px);background-size:75px 75px;mask-image:linear-gradient(to bottom,#0006,transparent 75%)}
-.topbar{position:sticky;top:0;z-index:20;background:#090c15e8;border-bottom:1px solid #ffffff1d;backdrop-filter:blur(22px)}.topbar-inner{max-width:1380px;padding:1.05rem 2rem}.brand{color:white;font-size:1.05rem;letter-spacing:-.055em}.brand-mark{background:linear-gradient(135deg,#8d84ff,#61d4fd);color:#050612;border-radius:50%;width:31px;height:31px;box-shadow:0 0 22px #8f81ff77}.top-links a{color:#c4c9d7;letter-spacing:.02em}.top-links a:hover{color:white}
-.layout{max-width:1380px;grid-template-columns:225px minmax(0,1fr);gap:4.5rem;padding:0 2rem}.toc{top:7.5rem;padding-top:3.5rem}.toc-title{color:#9b8df5;letter-spacing:.22em}.toc a{border-color:#30374b;padding:.48rem .85rem;font-size:.76rem}.toc a:hover,.toc a:focus{background:#a69aff0b;color:#d2caff}
-article{max-width:940px;padding:0 0 7rem}.hero-wrap{position:relative;isolation:isolate;min-height:590px;padding:6.5rem 0 4rem;display:flex;align-items:center;overflow:hidden}.hero-wrap header{position:relative;z-index:2;width:100%;max-width:780px;margin:0}.hero-art{position:absolute;right:-215px;top:36px;width:600px;height:600px;pointer-events:none;opacity:.88;z-index:-1;filter:drop-shadow(0 0 80px #755fee3f)}.hero-art .orb{position:absolute;inset:110px;border-radius:50%;background:radial-gradient(circle at 30% 28%,#eff8ff,#9c8bff 18%,#504bbf 42%,#171943 64%,#090b15 73%);box-shadow:inset -20px -30px 55px #030513,0 0 90px #7974ff77;transform:rotate(-22deg)}.hero-art .ring{position:absolute;inset:72px;border:1px solid #a8a4ff66;border-radius:50%;transform:rotateX(68deg) rotate(-35deg);box-shadow:0 0 18px #beb9ff66}.hero-art .ring.two{inset:30px;transform:rotateY(65deg) rotate(32deg);border-color:#6dd4fe80}.hero-art .ring.three{inset:5px;border-style:dashed;border-color:#e9e4ff44;transform:rotate(40deg)}
-.kicker{font-size:.75rem;letter-spacing:.25em;color:#b9aafa;margin-bottom:1.65rem}h1{font-size:clamp(3rem,5.9vw,5.65rem);line-height:1.04;letter-spacing:-.075em;font-weight:750;margin-bottom:1.7rem;text-wrap:balance;max-width:800px;text-shadow:0 12px 70px #0008}h1 em{font-style:normal;background:linear-gradient(110deg,#fff,#ab9bff 50%,#75dafa);background-clip:text;-webkit-background-clip:text;color:transparent}.deck{font-size:1.2rem;line-height:1.66;color:#b8c1d2;max-width:620px}.intro-meta{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:#a9b0c5;margin-top:1.65rem}
-h2{font-size:clamp(1.75rem,2.8vw,2.4rem);font-weight:700;letter-spacing:-.05em;margin-top:4.9rem;margin-bottom:1.1rem}h3{font-size:1.24rem;letter-spacing:-.025em}p{color:#c0c7d7}p strong{color:#fff}a{color:#b9abff}a:hover{color:#e3ddff}.stats{margin:0 0 2.8rem;gap:1px;border:1px solid #353950;border-radius:20px;overflow:hidden;background:#353950}.stat{background:linear-gradient(155deg,#181d30,#101421);border:0;border-radius:0;box-shadow:none;padding:1.65rem}.stat b{font-size:2.3rem;color:#fff;letter-spacing:-.06em}.stat span{color:#a6b0c4;font-size:.71rem;text-transform:uppercase;letter-spacing:.055em}
-.architecture{padding:2rem;background:linear-gradient(145deg,#171a30,#101522);border:1px solid #343657;border-radius:22px}.architecture h2{font-size:1.15rem;color:#fff}.architecture .arch-step{background:#0b1020;border-color:#3e4565;border-radius:14px;padding:1.15rem .3rem;font-size:.8rem}.arch-arrow{color:#a69aff}.note{background:#211c39;border:1px solid #4d4675;border-left:4px solid #ad9cfc;border-radius:13px;padding:1.45rem}.card,.graph{background:linear-gradient(150deg,#171b2b,#101521);border-color:#363a53;border-radius:18px;padding:1.55rem}.node{background:#23243b;border-color:#57517c;color:#eceaff;border-radius:9px;padding:.65rem .9rem}.edge{color:#b0a1ff}pre{background:#090d17;border-color:#353951;border-radius:16px;padding:1.55rem;box-shadow:inset 0 1px #ffffff08}.table-wrap{border-color:#34394d;border-radius:16px}thead{background:#232338}th,td{border-color:#34394d}tbody tr:nth-child(odd){background:#ffffff04}th{color:#bec1e3}footer{border-color:#34394d}.caption{color:#9ba3bb}.section-rule{background:#34394d}
-.reveal{animation:rise .7s both}@keyframes rise{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){.reveal{animation:none}html{scroll-behavior:auto}}@media(max-width:900px){.layout{grid-template-columns:1fr;gap:0}.hero-wrap{min-height:490px;padding:5rem 0 3rem}.hero-art{right:-270px;opacity:.5}}@media(max-width:590px){.topbar-inner{padding:.85rem 1.1rem}.layout{padding:0 1.1rem}.hero-wrap{min-height:490px;padding:4rem 0 3rem}.hero-art{right:-370px;top:25px;opacity:.35}h1{font-size:clamp(2.9rem,12vw,4.2rem)}.deck{font-size:1.05rem}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}.arch-flow{grid-template-columns:1fr}.split{grid-template-columns:1fr}}
-/* Editorial card treatment: quiet surfaces, precise dividers, no gradient panels. */
-.stats{gap:0;border:0;border-top:1px solid #3a4050;border-bottom:1px solid #3a4050;border-radius:0;background:transparent;margin:0 0 3rem;overflow:visible}
-.stat{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:1.35rem 1.6rem 1.35rem 0}
-.stat+.stat{border-left:1px solid #3a4050!important;padding-left:1.6rem}
-.stat b{font-size:2rem;font-weight:650;letter-spacing:-.045em;color:#f5f6f9}
-.stat span{font-size:.74rem;text-transform:none;letter-spacing:0;color:#a4adbe;font-weight:500;margin-top:.3rem}
-.architecture,.card,.graph{background:#0c1019!important;border:1px solid #313745!important;border-radius:3px!important;box-shadow:none!important}
-.architecture{padding:1.6rem 1.8rem}
-.architecture .arch-step{background:transparent!important;border:1px solid #3b4352!important;border-radius:2px!important;padding:1.1rem .6rem;font-weight:600}
-.arch-arrow{color:#8c95ab}
-.split{gap:0;border-top:1px solid #343b49;border-bottom:1px solid #343b49;margin:1.4rem 0 1.9rem}
-.split .card{background:transparent!important;border:0!important;border-radius:0!important;padding:1.5rem 1.6rem 1.5rem 0}
-.split .card+.card{border-left:1px solid #343b49!important;padding-left:1.6rem}
-.card h3{font-size:1.07rem;font-weight:650;letter-spacing:-.02em;margin:0 0 .7rem}
-.card p{color:#aeb7c6;font-size:.91rem}
-.graph{padding:1.3rem 1.4rem;margin:1rem 0 1.6rem}
-.node{background:transparent!important;border:1px solid #515869!important;border-radius:2px!important;color:#e5e9f3;font-size:11px;font-weight:550;padding:.52rem .65rem}
-.edge{color:#9eacc7;font-weight:500}
-.note{background:transparent!important;border:0!important;border-left:2px solid #8c8fb4!important;border-radius:0!important;padding:.4rem 0 .4rem 1.25rem}
-.table-wrap{border:1px solid #303747;border-radius:2px}
-thead{background:#151b27}tbody tr:nth-child(odd){background:transparent}tbody tr:hover{background:#ffffff05}
-pre{border-radius:3px;box-shadow:none}
-@media(max-width:590px){.stat+.stat{padding-left:1rem}.stat{padding-right:.8rem}.stat:last-child{border-left:0!important;border-top:1px solid #343b49!important;padding-left:0}.split .card+.card{border-left:0!important;border-top:1px solid #343b49!important;padding-left:0}.split .card{padding-right:0}}
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="/" aria-label="Memspace engineering blog, home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#14161b"/><path d="M9 22V12l7 6 7-6v10" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="12" r="2.6" fill="#6b4cff"/></svg>
+        Memspace
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/" aria-current="page">Story</a>
+        <a href="/ontology">Ontology</a>
+        <a href="/falkordb">FalkorDB</a>
+        <a class="nav-cta nav-hide-sm" href="https://shared-memory-mcp-production.up.railway.app">Try it</a>
+      </nav>
+    </div>
+  </header>
 
-</style>
-<meta content="#07090e" name="theme-color"/></head>
-<body><a class="skip-link" href="#main">Skip to content</a><div class="topbar"><div class="topbar-inner"><a class="brand" href="#main"><span class="brand-mark">M</span>memspace / engineering</a><div class="top-links"><a href="https://docs.falkordb.com" rel="noopener noreferrer" target="_blank">FalkorDB docs ↗</a><a href="#what-this-choice-bought-and-what-it-did-not">Trade-offs ↓</a></div></div></div>
-<main class="layout" id="main"><nav aria-label="On this page" class="toc"><p class="toc-title">On this page</p><a href="#why-a-property-graph-and-why-this-one">Why a property graph, and why this one</a><a href="#two-named-graphs-never-one-mixed-bag">Two named graphs, never one mixed bag</a><a href="#the-schema-is-the-product">A memory is more than a row</a><a href="#authorization-is-a-cypher-pattern-not-a-filter-afterward">Authorization is a Cypher pattern, not a filter afterward</a><a href="#hybrid-retrieval-without-a-second-index-product">Hybrid retrieval without a second index product</a><a href="#the-job-queue-is-also-a-graph">The job queue is also a graph</a><a href="#writes-that-survive-retries-reads-that-survive-revocation">Writes that survive retries, reads that survive revocation</a><a href="#how-the-database-actually-runs">How the database actually runs</a><a href="#what-this-choice-bought-and-what-it-did-not">What this choice bought, and what it did not</a></nav><article>
-<div class="hero-wrap reveal"><div aria-hidden="true" class="hero-art"><div class="ring"></div><div class="ring two"></div><div class="ring three"></div><div class="orb"></div></div><header>
-<p class="kicker">MEMSPACE  /  ENGINEERING</p>
-<h1>One graph. <em>One source of truth.</em> Inside Memspace.</h1>
-<p class="deck">Why we put memories, provenance, permission checks, hybrid search, and even background jobs into FalkorDB—and the trade-offs that came with it.</p>
-<div class="intro-meta"><span>Engineering deep dive</span><span>October 2026</span><span>Architecture &amp; implementation</span></div></header></div>
-<div class="stats">
-<div class="stat"><b>2</b><span>Named graphs per environment</span></div>
-<div class="stat"><b>15</b><span>Application node labels</span></div>
-<div class="stat"><b>768-d</b><span>Gemini vectors in-graph</span></div>
-</div><section aria-label="High level architecture" class="architecture"><h2>The architecture in one glance</h2><p>External services authenticate and derive; FalkorDB remains the durable source of record.</p><div class="arch-flow"><div class="arch-step">MCP clients<small>Remember · revise · recall</small></div><span aria-hidden="true" class="arch-arrow">→</span><div class="arch-step">Memspace API<small>Auth · validation · scoping</small></div><span aria-hidden="true" class="arch-arrow">→</span><div class="arch-step">FalkorDB<small>Graph · search · jobs</small></div></div><p class="caption">Gemini creates embeddings; Clerk provides identity. Neither replaces the graph’s authorization or data model.</p></section>
-<p>Memspace is a personal ontology for assistants that connect over MCP. The interesting part is not that it stores memories. It is that every durable artifact — source text, a structured claim, a frozen share into a space, a search vector, a pending extraction job—is a node or relationship in <a href="https://docs.falkordb.com">FalkorDB</a>. Gemini only produces embeddings. Clerk only authenticates. The graph is the system of record.</p>
-<p class="note"><strong>Why one store.</strong> A separate vector database would introduce another synchronization boundary. Keeping the search indexes and authorization graph in FalkorDB lets retrieval recheck access against current membership before returning a hit—even when an index entry is stale.</p>
-<h2 id="why-a-property-graph-and-why-this-one">Why a property graph, and why this one</h2>
-<p>Everyday personal memory is relational. A preference applies to a topic. A task depends on another task. A claim is supported by a source revision. A share exists only while a person is an active member of a space. Those are walks, not foreign keys you join after retrieval.</p>
-<p>The team looked at Graphiti and Mem0 as design precedents for hybrid retrieval, then implemented an evidence-backed property graph with a versioned JSON/Zod contract. It is not RDF, OWL, or a reasoner. Schema 1.1 lives in <code>src/ontology.ts</code>. FalkorDB is the runtime: Redis-protocol graph with parameterized Cypher, unique constraints, native full-text, and native HNSW vectors, reached through the official <code>falkordb</code> Node client (<code>^6.8.0</code>).</p>
-<p>Vectors never leave that graph. Gemini Embedding 2 (768 dimensions, cosine, normalized) writes <code>vecf32</code> onto <code>KnowledgeSearchDocument</code> nodes. A provider failure leaves the source saved and reports pending indexing. Missing credentials fall back to keyword retrieval. The design does not require Pinecone, a separate Redis search cluster, or an OWL export.</p>
-<h2 id="two-named-graphs-never-one-mixed-bag">Two named graphs, never one mixed bag</h2>
-<p>One FalkorDB server hosts two graphs, selected by name rather than by a second process. Clerk profile sync uses <code>FALKORDB_GRAPH</code> (<code>sandbox_profiles</code> in the sandbox, <code>shared_memory</code> locally). The application graph uses <code>FALKORDB_MEMORY_GRAPH</code> (<code>sandbox_memory</code> / <code>shared_memory_app</code>). User PII and memory content do not share labels.</p>
-<div class="split">
-<div class="card">
-<h3>Profiles graph</h3>
-<p><code>src/users.ts</code>. <code>User</code> nodes keyed by Clerk ID. Unique constraint on <code>clerkId</code>. Delayed webhook updates cannot revive a tombstone: deletion nulls email and name and is terminal for that ID. Health check is <code>RETURN 1 AS ok</code> on a read-only query.</p>
-</div>
-<div class="card">
-<h3>Application graph</h3>
-<p><code>src/memory.ts</code>. Fifteen labels from <code>Person</code> through <code>Publication</code>, each with a range index and a unique <code>id</code> constraint. <code>MemoryStore.init()</code> waits until every constraint is <code>OPERATIONAL</code>. Tests create a unique synthetic graph name and delete it afterward. Hosted sandbox and production graphs are never the test target.</p>
-</div>
-</div>
-<h2 id="the-schema-is-the-product">A memory is more than a row</h2>
-<p>A save is not an INSERT. <code>remember</code> MERGEs a <code>Person</code>, a <code>Memory</code> whose ID is a hash of owner plus idempotency key, a <code>Revision</code>, an <code>OntologyJob</code>, and <code>ABOUT</code> links to <code>Entity</code> nodes. Retrying the same key is a no-op. Changing the payload against a used key is a 409.</p>
-<h3>Source memories</h3>
-<div class="graph">
-<div class="nodes">
-<span class="node">Person</span><span class="edge">AUTHORED →</span>
-<span class="node">Memory</span><span class="edge">HAS_REVISION →</span>
-<span class="node">Revision</span>
-</div>
-<div class="nodes" style="margin-top:0.7rem">
-<span class="node">Memory</span><span class="edge">ABOUT →</span>
-<span class="node">Entity</span>
-<span class="node">Person</span><span class="edge">MEMBER_OF →</span>
-<span class="node">Space</span>
-</div>
-<div class="nodes" style="margin-top:0.7rem">
-<span class="node">Memory</span><span class="edge">SHARED_IN →</span>
-<span class="node">Space</span>
-<span class="node">OntologyJob</span><span class="edge">SUPPORTED_BY →</span>
-<span class="node">Memory</span>
-</div>
-<p class="caption">Source: src/memory.ts</p>
-</div>
-<h3>Structured knowledge</h3>
-<p>Claims stay attributed assertions, not inferred truth.</p>
-<div class="graph">
-<div class="nodes">
-<span class="node">KnowledgeBatch</span><span class="edge">CONTAINS →</span>
-<span class="node">KnowledgeClaim</span><span class="edge">SUPPORTED_BY →</span>
-<span class="node">Memory</span>
-</div>
-<div class="nodes" style="margin-top:0.7rem">
-<span class="node">KnowledgeClaim</span><span class="edge">BASED_ON →</span>
-<span class="node">Revision</span>
-<span class="node">KnowledgeClaim</span><span class="edge">SUBJECT / OBJECT →</span>
-<span class="node">KnowledgeEntity</span>
-</div>
-<div class="nodes" style="margin-top:0.7rem">
-<span class="node">Publication</span><span class="edge">DERIVED_FROM →</span>
-<span class="node">KnowledgeClaim</span>
-</div>
-<p class="caption">Source: src/knowledge.ts</p>
-</div>
-<h3>Sharing and search</h3>
-<p>Each authorized namespace gets its own indexes.</p>
-<div class="graph">
-<div class="nodes">
-<span class="node">Person</span><span class="edge">MEMBER_OF →</span>
-<span class="node">Space</span>
-<span class="node">Publication</span><span class="edge">PUBLISHED_IN →</span>
-<span class="node">Space</span>
-</div>
-<div class="nodes" style="margin-top:0.7rem">
-<span class="node">Publication</span><span class="edge">DERIVED_FROM →</span>
-<span class="node">KnowledgeClaim</span>
-</div>
-<div class="nodes" style="margin-top:0.7rem">
-<span class="node">SearchDocument</span><span class="edge">INDEXES →</span>
-<span class="node">KnowledgeClaim</span>
-<span class="node">SearchDocument</span><span class="edge">INDEXES →</span>
-<span class="node">Publication</span>
-</div>
-<p class="caption">Source: src/knowledge-search.ts</p>
-</div>
-<h3>Labels the application graph actually creates</h3>
-<div class="table-wrap"><table>
-<thead><tr><th>Label</th><th>Role</th></tr></thead>
-<tbody>
-<tr><td>Person (app) / User (profiles)</td><td>Account actor vs Clerk profile (separate graphs)</td></tr>
-<tr><td>Memory / Revision</td><td>Source text with compare-and-swap history</td></tr>
-<tr><td>Entity</td><td>Loose ABOUT links from unstructured memories</td></tr>
-<tr><td>KnowledgeEntity / KnowledgeClaim</td><td>Typed ontology 1.1 assertions</td></tr>
-<tr><td>KnowledgeBatch</td><td>Idempotent <code>record_knowledge</code> unit</td></tr>
-<tr><td>Publication</td><td>Frozen selected claim in one space</td></tr>
-<tr><td>KnowledgeSearchDocument</td><td>Scoped full-text + HNSW payload</td></tr>
-<tr><td>Space / Invitation / Change</td><td>Membership, invites, share receipts</td></tr>
-<tr><td>SharingRule / Connection</td><td>Auto-share rules and MCP clients</td></tr>
-<tr><td>OntologyJob</td><td>Durable extraction queue with leases</td></tr>
-</tbody>
-</table></div>
-<h2 id="authorization-is-a-cypher-pattern-not-a-filter-afterward">Authorization is a Cypher pattern, not a filter afterward</h2>
-<p>Membership is not permission to read everything in a space. Private memories stay private unless they are explicitly shared or published. Every read re-checks current edges. The access helper in <code>MemoryStore</code> is the whole policy for unstructured memories:</p>
-<pre><code>OPTIONAL MATCH (m)-[:SHARED_IN {active:true}]-&gt;(:Space)
-  &lt;-[membership:MEMBER_OF {active:true}]-(:Person {id:$user})
+  <nav class="dots" aria-label="On this page">
+    <ol>
+      <li><a href="#setup"><span>Setup</span><i></i></a></li>
+      <li><a href="#personal"><span>Your assistants</span><i></i></a></li>
+      <li><a href="#together"><span>Your team</span><i></i></a></li>
+      <li><a href="#ontology"><span>The ontology</span><i></i></a></li>
+      <li><a href="#falkordb"><span>FalkorDB</span><i></i></a></li>
+      <li><a href="#learned"><span>What we learned</span><i></i></a></li>
+      <li><a href="#try"><span>Try it</span><i></i></a></li>
+    </ol>
+  </nav>
+
+  <main id="main" class="page">
+    <section class="hero" aria-labelledby="title">
+      <div>
+        <h1 id="title">Dot, Muse and Grok Bot now share one memory</h1>
+        <p class="dek">We built Memspace at Graph Hacks so your AI assistants stop starting from zero. Here's how it works, and why it's an ontology sitting on FalkorDB.</p>
+        <div class="byline">
+          <span class="avatars" aria-hidden="true"><span>AG</span><span>PJ</span><span>RP</span></span>
+          <span><strong>Afshal Gulam, Pranav Janakiraman and Roshan Premil</strong></span>
+          <span><time datetime="2026-10-18">October 18, 2026</time> · 10 min read</span>
+        </div>
+      </div>
+
+      <figure class="hero-figure" aria-labelledby="hero-cap">
+        <svg class="schematic hero-schematic" viewBox="0 0 560 440" role="img" aria-labelledby="hero-title hero-desc">
+          <title id="hero-title">Three assistants connected to one memory graph</title>
+          <desc id="hero-desc">Dot, Muse and Grok Bot each connect to the Memspace server, which stores facts in a FalkorDB graph: Afshal Gulam works on Loop, and a dark-mode-first decision was made by Afshal about Loop.</desc>
+          <defs>
+            <linearGradient id="spectrum" gradientUnits="userSpaceOnUse" x1="80" y1="0" x2="306" y2="0">
+              <stop offset="0" stop-color="#12b0d8"/><stop offset=".55" stop-color="#6b4cff"/><stop offset="1" stop-color="#f5873a"/>
+            </linearGradient>
+            <clipPath id="tile-clip"><rect width="56" height="56" rx="15"/></clipPath>
+            <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L8 4L0 8z" fill="#1f5edb"/></marker>
+          </defs>
+
+          <path class="trace" d="M80 88H140Q152 88 152 100V193Q152 205 164 205H226"/>
+          <path class="trace" d="M80 220H226"/>
+          <path class="trace" d="M80 352H140Q152 352 152 340V247Q152 235 164 235H226"/>
+          <path class="trace-live" d="M80 88H140Q152 88 152 100V193Q152 205 164 205H226"/>
+          <path class="trace-live" d="M80 220H226"/>
+          <path class="trace-live" d="M80 352H140Q152 352 152 340V247Q152 235 164 235H226"/>
+
+          <g transform="translate(24 60)">
+            <rect width="56" height="56" rx="15" fill="#fff" stroke="#e1e5ec"/>
+            <image href="/assets/logos/dot.png" width="56" height="56" clip-path="url(#tile-clip)"/>
+            <text class="label-ink" x="28" y="76" text-anchor="middle">Dot</text>
+            <text class="label" x="28" y="91" text-anchor="middle">OpenAI</text>
+          </g>
+          <g transform="translate(24 192)">
+            <rect width="56" height="56" rx="15" fill="#fff" stroke="#e1e5ec"/>
+            <image href="/assets/logos/muse.svg" x="10" y="10" width="36" height="36"/>
+            <text class="label-ink" x="28" y="76" text-anchor="middle">Muse</text>
+            <text class="label" x="28" y="91" text-anchor="middle">Meta</text>
+          </g>
+          <g transform="translate(24 324)">
+            <rect width="56" height="56" rx="15" fill="#fff" stroke="#e1e5ec"/>
+            <image href="/assets/logos/grok-bot.png" width="56" height="56" clip-path="url(#tile-clip)"/>
+            <text class="label-ink" x="28" y="76" text-anchor="middle">Grok Bot</text>
+            <text class="label" x="28" y="91" text-anchor="middle">xAI</text>
+          </g>
+
+          <rect class="core" x="226" y="178" width="80" height="84" rx="16"/>
+          <text x="266" y="217" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="500">Memspace</text>
+          <text x="266" y="234" text-anchor="middle" fill="#9aa1b2" font-size="10">MCP</text>
+          <path class="trace" d="M306 220H330"/>
+          <circle cx="330" cy="220" r="3" fill="#6b4cff"/>
+
+          <rect x="330" y="28" width="216" height="386" rx="18" fill="rgba(255,255,255,.55)" stroke="#c9d0db" stroke-dasharray="4 5"/>
+          <text class="label" x="438" y="402" text-anchor="middle">FalkorDB graph</text>
+
+          <path d="M450 103V188" stroke="#1f5edb" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <text class="rel" x="457" y="150">works on</text>
+          <path d="M370 325V105" stroke="#1f5edb" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <text class="rel" x="377" y="292">decided by</text>
+          <path d="M470 325V240" stroke="#1f5edb" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <text class="rel" x="477" y="292">about</text>
+
+          <g>
+            <rect class="node-box" x="345" y="55" width="160" height="48" rx="10"/>
+            <circle cx="359" cy="72" r="3" fill="#7c5cff"/>
+            <text class="label" x="367" y="75">person</text>
+            <text class="label-ink" x="355" y="93">Afshal Gulam</text>
+          </g>
+          <g>
+            <rect class="node-box" x="400" y="190" width="135" height="48" rx="10"/>
+            <circle cx="414" cy="207" r="3" fill="#8a93a6"/>
+            <text class="label" x="422" y="210">project</text>
+            <text class="label-ink" x="410" y="228">Loop</text>
+          </g>
+          <g>
+            <rect class="node-box" x="345" y="325" width="180" height="48" rx="10"/>
+            <circle cx="359" cy="342" r="3" fill="#7a6fb0"/>
+            <text class="label" x="367" y="345">decision</text>
+            <text class="label-ink" x="355" y="363">Dark-mode-first UI</text>
+          </g>
+        </svg>
+        <figcaption id="hero-cap" class="visually-hidden">Dot, Muse and Grok Bot write to the same Memspace graph.</figcaption>
+      </figure>
+    </section>
+
+    <article class="article">
+      <div class="prose">
+        <p class="lead">Between the three of us we use Dot, Muse and Grok Bot, and most days more than one of them. Each is good on its own. None of them knows what the others were told.</p>
+        <p>That got old quickly. Pranav would log meals with Dot, then have to tell Muse the same things again. Roshan only knew what Afshal had finished on their school project by messaging to ask.</p>
+        <p>So for Graph Hacks we built Memspace: one memory any of your assistants can read and write, which you can share pieces of with the people you work with. This post covers what it does, and spends most of its time on the two things underneath it, an ontology and FalkorDB.</p>
+      </div>
+
+      <figure class="figure prose bracketed">
+        <button class="video" type="button" data-youtube="xcT6GBFVUFw" aria-label="Play the Memspace demo video, 4 minutes 49 seconds">
+          <span class="poster" aria-hidden="true">
+            <span class="poster__logos">
+              <img src="/assets/logos/dot.png" alt="" width="64" height="64">
+              <img src="/assets/logos/muse.svg" alt="" width="64" height="64" class="is-pad">
+              <img src="/assets/logos/grok-bot.png" alt="" width="64" height="64">
+            </span>
+            <span class="poster__title">One shared memory graph for all your AI assistants</span>
+            <span class="poster__meta">Memspace · Graph Hacks demo · 4:49</span>
+          </span>
+          <span class="video__play"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#14161b"/><path d="M10 8.2v7.6L16 12z" fill="#fff"/></svg>Watch the demo</span>
+        </button>
+      </figure>
+
+      <div class="prose">
+        <h2 id="setup"><span class="chapter-num">01</span>Two prompts and an MCP server</h2>
+        <p>Memspace is a remote <a href="https://modelcontextprotocol.io">MCP</a> server. Any assistant that can connect to MCP with OAuth can use it. We've run it with Dot from OpenAI, Muse from Meta, Grok Bot from xAI, and Codex.</p>
+        <p>Setup is the same everywhere. You sign up on the dashboard, open Connections, pick your assistant, and follow three steps:</p>
+      </div>
+
+      <div class="figure wide setup-grid">
+        <figure class="bracketed setup-shot">
+          <div class="shot">
+            <div class="shot-bar"><i></i><i></i><i></i><span>Memspace · Connections</span></div>
+            <img src="/assets/img/dashboard-setup.png" width="1092" height="1111" alt="The Memspace dashboard's Connections page: pick Dot, Muse or Grok Bot, then step 1 Connect Memspace with a Copy install prompt button and the MCP URL, and step 2 Install the instructions skill with a Copy instructions skill button." loading="lazy" decoding="async">
+          </div>
+        </figure>
+        <ol class="steps">
+          <li class="step">
+            <span class="step__n">1</span>
+            <p class="step__title">Add the server</p>
+            <p class="step__body">Paste the Memspace MCP URL into your assistant and sign in with OAuth. No client secret, just your Memspace account.</p>
+          </li>
+          <li class="step">
+            <span class="step__n">2</span>
+            <p class="step__title">Paste the install prompt</p>
+            <p class="step__body">The assistant checks the connection by calling <code>get_connection_status</code>. Signing in through a browser isn't proof; a working tool call is.</p>
+          </li>
+          <li class="step">
+            <span class="step__n">3</span>
+            <p class="step__title">Paste the instructions skill</p>
+            <p class="step__body">It teaches the assistant when to save, recall, correct and share, and how to set up a timed check in its own scheduler.</p>
+          </li>
+        </ol>
+      </div>
+
+      <div class="prose">
+        <p>After that you talk to your assistant like you always did. It saves what's worth keeping and tells you when it has. Everything any of your assistants saved shows up in one list, typed, and private until you share it.</p>
+      </div>
+
+      <figure class="figure is-wide">
+        <div class="bracketed"><div class="shot">
+          <div class="shot-bar"><i></i><i></i><i></i><span>Memspace · Memories</span></div>
+          <img src="/assets/img/dashboard-memories.png" width="1400" height="851" alt="The Memories tab listing typed notes about the Loop project: an event, a decision, two tasks, a goal and a fact, each marked Yours." loading="lazy" decoding="async">
+        </div></div>
+        <figcaption>The Memories tab on our demo account.</figcaption>
+      </figure>
+
+      <div class="prose">
+
+        <h2 id="personal"><span class="chapter-num">02</span>Your assistants, finally caught up</h2>
+        <p>Here's the first thing we wanted. Pranav uses Dot as a food log, and asked it to save yesterday's meals to Memspace, then to do the same every night at 10pm.</p>
+        <p>Muse had the same skill installed, plus a personal watch: a scheduled task that checks Memspace every 10 minutes for anything Pranav's other assistants saved. The next morning Muse already knew what Pranav had eaten the day before, popcorn included, without being told.</p>
+      </div>
+
+      <figure class="figure is-wide">
+        <div class="story">
+          <div class="chat" role="group" aria-label="Conversation with Dot">
+            <div class="chat__head"><img src="/assets/logos/dot.png" alt="" width="30" height="30"><div><b>Dot</b><small>OpenAI</small></div></div>
+            <p class="bubble bubble--me">Add what I ate yesterday to my personal shared memory.</p>
+            <p class="bubble bubble--bot">Saved yesterday's food intake, October 17, to your private shared memory, including the popcorn.</p>
+            <p class="bubble bubble--me">Do this every night at 10pm.</p>
+            <p class="bubble bubble--bot">Set for 10pm Pacific every night. Each day's summary will be saved privately.</p>
+            <div class="receipt"><span class="chip chip--ok">saved</span><span class="chip">source: dot</span><span class="chip">private</span></div>
+          </div>
+
+          <div class="story__link" aria-hidden="true">
+            <svg viewBox="0 0 120 26"><path d="M2 13H112" stroke="#c9d0db" stroke-width="1.5" stroke-dasharray="4 4"/><path d="M106 7l8 6-8 6" fill="none" stroke="#6b4cff" stroke-width="1.6"/></svg>
+            <span>saved by Dot,<br>found by Muse</span>
+          </div>
+
+          <div class="chat" role="group" aria-label="Muse picking up the update">
+            <div class="chat__head"><img src="/assets/logos/muse.svg" alt="" width="30" height="30" style="background:#fff;padding:3px;border:1px solid #e1e5ec"><div><b>Muse</b><small>Meta</small></div></div>
+            <div class="task-card">
+              <b>Memspace personal watch</b>
+              <small>Every 10 minutes · other assistants' writes</small>
+              <div class="runs"><span class="chip chip--ok">Succeeded 9:10 AM</span><span class="chip chip--ok">Succeeded 9:20 AM</span></div>
+            </div>
+            <p class="bubble bubble--bot">Dot saved your food log for October 17: a whey shake, chicken for lunch and dinner, and a medium popcorn. Roughly 2,700 calories and 178g of protein.</p>
+          </div>
+        </div>
+        <figcaption>Pranav's setup from the demo. Dot writes, Muse's scheduled watch reads.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>The trick is small. When an assistant connects, Memspace gives it its own client ID, and every memory remembers which assistant saved it. A personal watch only reports memories saved by a different assistant, so Muse never tells Pranav about something it saved itself.</p>
+        <p>The checks run in each assistant's own scheduler: a Scheduled task in Dot, a cron job in Muse, a routine in Grok Bot. You pick how often, anywhere from every 5 minutes to once a day.</p>
+
+        <h2 id="together"><span class="chapter-num">03</span>Your teammates' assistants, too</h2>
+        <p>The second thing is the one we were most excited about. Roshan and Afshal are building a school project together, an app called Loop. Roshan created a shared space for it on the dashboard, invited Afshal by email as a contributor, and sent the invite link over.</p>
+        <p>From then on Afshal could share individual memories into the space. Each share is a choice; the rest of their memory stays private. When Roshan sat down to work on the UI, the first stop was one question to Grok Bot.</p>
+      </div>
+
+      <figure class="figure is-wide">
+        <div class="bracketed"><div class="shot">
+          <div class="shot-bar"><i></i><i></i><i></i><span>Memspace · Shared spaces</span></div>
+          <img src="/assets/img/dashboard-space.png" width="1507" height="812" alt="The 'A school project' shared space: shared notes about the Loop UI review, a dark-mode-first decision and a study-group screen task, with Roshan as owner and Afshal as contributor." loading="lazy" decoding="async">
+        </div></div>
+        <figcaption>The space on our demo account, signed in as Afshal. Shared notes on the left, members on the right.</figcaption>
+      </figure>
+
+      <figure class="figure prose">
+        <div class="chat" role="group" aria-label="Conversation with Grok Bot">
+          <div class="chat__head"><img src="/assets/logos/grok-bot.png" alt="" width="30" height="30"><div><b>Grok Bot</b><small>xAI · Roshan's assistant</small></div></div>
+          <p class="bubble bubble--me">What has Afshal been doing for the project?</p>
+          <p class="bubble bubble--bot">Afshal is leading Loop's UI design and front-end work. The aim is a demo-ready prototype covering 5 core screens by the end of October. They've planned an onboarding flow and a study-group discovery screen, which is still marked proposed, and decided the UI will be dark-mode-first with a single accent colour.</p>
+          <div class="receipt"><span class="chip chip--blue">read from: A school project</span><span class="chip">6 shared memories</span></div>
+        </div>
+        <figcaption>Roshan's question from the demo. Grok Bot only sees what Afshal shared into this space.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>So Roshan picked something else to build. No meeting, no "hey, what are you working on?" message. That answer came from facts, not a chat transcript, which brings us to the part of Memspace we spent the most time on.</p>
+
+        <h2 id="ontology"><span class="chapter-num">04</span>Under the hood: an ontology</h2>
+        <p>An ontology is a shared model of a world: the kinds of things in it, how they can relate, and the rules for connecting them. Large companies use them for exactly this. A customer, an order and a supplier stop being rows in three different systems and become things with known relationships, so the people and the software are working from the same facts.</p>
+        <p>We wanted that for someone's personal life. Your assistants don't need a pile of old chats. They need to know that Afshal works on Loop, that a decision was made, who made it, and what's still only proposed.</p>
+
+        <div class="stat-line" role="group" aria-label="Ontology size">
+          <div><b>13</b><span>types</span></div>
+          <div><b>49</b><span>relationships</span></div>
+          <div><b>1.2.0</b><span>schema version</span></div>
+        </div>
+      </div>
+
+      <figure class="figure wide">
+        <div class="panel onto-panel bracketed">
+<svg class="schematic onto-map" viewBox="0 0 1040 600" role="img" aria-labelledby="map-title map-desc">
+<title id="map-title">The Memspace ontology around a person</title>
+<desc id="map-desc">Person sits in the middle. A person works at an organization, lives in a place, has skills in a topic, works on a project, wants a goal, practices a routine, owns or uses an item and owes an obligation. Events have participants, preferences belong to a person, decisions are decided by a person and tasks are assigned to a person.</desc>
+<defs><marker id="m-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="#1f5edb"/></marker></defs>
+<path d="M460 274V220H120V92" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M480 274V190H320V92" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M520 274V92" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M560 274V190H720V92" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M580 274V220H920V92" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M460 326V380H120V508" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M480 326V410H320V508" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M520 326V508" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M720 508V410H560V326" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M920 508V380H580V326" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M300 300H440" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<path d="M740 300H600" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#m-arrow)"/>
+<text class="rel" x="126" y="116" text-anchor="start">works at</text>
+<text class="rel" x="326" y="116" text-anchor="start">lives in</text>
+<text class="rel" x="526" y="116" text-anchor="start">has skill</text>
+<text class="rel" x="726" y="116" text-anchor="start">works on</text>
+<text class="rel" x="926" y="116" text-anchor="start">wants</text>
+<text class="rel" x="126" y="492" text-anchor="start">practices</text>
+<text class="rel" x="326" y="492" text-anchor="start">owns · uses</text>
+<text class="rel" x="526" y="492" text-anchor="start">owes</text>
+<text class="rel" x="726" y="492" text-anchor="start">has participant</text>
+<text class="rel" x="926" y="492" text-anchor="start">preference of</text>
+<text class="rel" x="370" y="292" text-anchor="middle">decided by</text>
+<text class="rel" x="670" y="292" text-anchor="middle">assigned to</text>
+<g><rect class="node-box" x="40" y="40" width="160" height="52" rx="11"/><circle cx="58" cy="66" r="4" fill="#3f73c9"/><text class="label-ink" x="70" y="70" font-size="13">Organization</text></g>
+<g><rect class="node-box" x="240" y="40" width="160" height="52" rx="11"/><circle cx="258" cy="66" r="4" fill="#3a8f86"/><text class="label-ink" x="270" y="70" font-size="13">Place</text></g>
+<g><rect class="node-box" x="440" y="40" width="160" height="52" rx="11"/><circle cx="458" cy="66" r="4" fill="#9aa1ae"/><text class="label-ink" x="470" y="70" font-size="13">Topic</text></g>
+<g><rect class="node-box" x="640" y="40" width="160" height="52" rx="11"/><circle cx="658" cy="66" r="4" fill="#8a93a6"/><text class="label-ink" x="670" y="70" font-size="13">Project</text></g>
+<g><rect class="node-box" x="840" y="40" width="160" height="52" rx="11"/><circle cx="858" cy="66" r="4" fill="#4f86b8"/><text class="label-ink" x="870" y="70" font-size="13">Goal</text></g>
+<g><rect class="node-box" x="40" y="508" width="160" height="52" rx="11"/><circle cx="58" cy="534" r="4" fill="#5d9c3a"/><text class="label-ink" x="70" y="538" font-size="13">Routine</text></g>
+<g><rect class="node-box" x="240" y="508" width="160" height="52" rx="11"/><circle cx="258" cy="534" r="4" fill="#c35b9b"/><text class="label-ink" x="270" y="538" font-size="13">Item</text></g>
+<g><rect class="node-box" x="440" y="508" width="160" height="52" rx="11"/><circle cx="458" cy="534" r="4" fill="#d25a4d"/><text class="label-ink" x="470" y="538" font-size="13">Obligation</text></g>
+<g><rect class="node-box" x="640" y="508" width="160" height="52" rx="11"/><circle cx="658" cy="534" r="4" fill="#c5803a"/><text class="label-ink" x="670" y="538" font-size="13">Event</text></g>
+<g><rect class="node-box" x="840" y="508" width="160" height="52" rx="11"/><circle cx="858" cy="534" r="4" fill="#b39233"/><text class="label-ink" x="870" y="538" font-size="13">Preference</text></g>
+<g><rect class="node-box" x="140" y="274" width="160" height="52" rx="11"/><circle cx="158" cy="300" r="4" fill="#7a6fb0"/><text class="label-ink" x="170" y="304" font-size="13">Decision</text></g>
+<g><rect class="node-box" x="740" y="274" width="160" height="52" rx="11"/><circle cx="758" cy="300" r="4" fill="#3f9b5b"/><text class="label-ink" x="770" y="304" font-size="13">Task</text></g>
+<g><rect x="440" y="274" width="160" height="52" rx="12" fill="#14161b"/><circle cx="460" cy="300" r="4.5" fill="#7c5cff"/><text x="474" y="305" fill="#fff" font-size="14" font-weight="600">Person</text></g>
+<text class="label" x="820" y="352" text-anchor="middle">+ 8 between people: knows, friend of…</text>
+</svg>
+        </div>
+        <div class="families">
+          <div class="family">
+            <h4>People and places</h4>
+            <p>Who and where. A name never links to someone's account.</p>
+            <div class="types">
+              <span class="type-pill" data-type="person">Person</span>
+              <span class="type-pill" data-type="organization">Organization</span>
+              <span class="type-pill" data-type="place">Place</span>
+              <span class="type-pill" data-type="topic">Topic</span>
+            </div>
+          </div>
+          <div class="family">
+            <h4>Work</h4>
+            <p>Efforts, work items, outcomes and the choices behind them.</p>
+            <div class="types">
+              <span class="type-pill" data-type="project">Project</span>
+              <span class="type-pill" data-type="task">Task</span>
+              <span class="type-pill" data-type="goal">Goal</span>
+              <span class="type-pill" data-type="decision">Decision</span>
+            </div>
+          </div>
+          <div class="family">
+            <h4>Everyday life</h4>
+            <p>One-off events, recurring habits, and preferences in context.</p>
+            <div class="types">
+              <span class="type-pill" data-type="event">Event</span>
+              <span class="type-pill" data-type="routine">Routine</span>
+              <span class="type-pill" data-type="preference">Preference</span>
+            </div>
+          </div>
+          <div class="family">
+            <h4>Things and money</h4>
+            <p>What you own or use, and who owes what to whom.</p>
+            <div class="types">
+              <span class="type-pill" data-type="item">Item</span>
+              <span class="type-pill" data-type="obligation">Obligation</span>
+            </div>
+          </div>
+        </div>
+        <figcaption>Some of the relationships that meet at a person. <a href="/ontology#relationships">See all 49</a>.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>The relationships are narrow on purpose. <code>WORKS_AT</code> means reported employment, not a job you want. <code>ASSIGNED_TO</code> doesn't mean the person accepted the task; that's <code>ACCEPTED_BY</code>. Visiting somewhere isn't <code>LIVES_IN</code>. These distinctions look fussy on paper. They're also exactly where a vaguer memory system would quietly invent facts about you.</p>
+
+        <h3>One sentence, broken into facts</h3>
+        <p>When you tell an assistant something, it calls <code>remember</code>. Memspace saves the note straight away. In the same write it queues a job, and a worker hands the note and the schema to a model (GPT-4.1 mini) with one request: return facts that fit. Every fact has to name a type and a relationship from the schema and quote the exact words it came from. If it doesn't validate, it's dropped and counted.</p>
+      </div>
+
+      <figure class="figure prose">
+        <div class="panel extract bracketed">
+          <p class="extract__quote">
+            <span class="who">Afshal, to Muse</span>
+            <mark class="span" style="--mark:var(--cyan)">I'm leading the UI design for Loop<sup>1</sup></mark>. <mark class="span" style="--mark:var(--violet)">We decided it'll be dark-mode-first with a single accent colour<sup>2</sup></mark>. <mark class="span" style="--mark:var(--amber)">I want a demo-ready prototype of the 5 core screens<sup>3</sup></mark>. <mark class="span" style="--mark:#9aa1ae">Maybe we'll add a light theme later<sup>4</sup></mark>.
+          </p>
+          <ul class="facts">
+            <li class="fact" style="--mark:var(--cyan)">
+              <span class="fact__key">1</span>
+              <span class="node" data-type="person"><span class="node__type">person</span><span class="node__name">Afshal Gulam</span></span>
+              <span class="edge">works on</span>
+              <span class="node" data-type="project"><span class="node__type">project</span><span class="node__name">Loop</span></span>
+            </li>
+            <li class="fact" style="--mark:var(--violet)">
+              <span class="fact__key">2</span>
+              <span class="node" data-type="decision"><span class="node__type">decision</span><span class="node__name">Dark-mode-first UI</span></span>
+              <span class="edge">decided by</span>
+              <span class="node" data-type="person"><span class="node__type">person</span><span class="node__name">Afshal Gulam</span></span>
+              <p class="fact__note">plus: about → Loop, and the choice itself as a value</p>
+            </li>
+            <li class="fact" style="--mark:var(--amber)">
+              <span class="fact__key">3</span>
+              <span class="node" data-type="person"><span class="node__type">person</span><span class="node__name">Afshal Gulam</span></span>
+              <span class="edge">wants</span>
+              <span class="node" data-type="goal"><span class="node__type">goal</span><span class="node__name">Demo-ready prototype, 5 screens</span></span>
+            </li>
+            <li class="fact" style="--mark:#9aa1ae">
+              <span class="fact__key">4</span>
+              <span class="chip">no fact</span>
+              <p class="fact__note" style="flex-basis:auto;margin:0">"Maybe" is a hypothetical. It stays in the note and never becomes a claim.</p>
+            </li>
+          </ul>
+        </div>
+        <figcaption>What the extraction returns for one message. The same facts appear in the dashboard's Ontology tab a few seconds later.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>The model sees the author's own recent facts too, so "Loop" lines up with the Loop it already knows about instead of becoming a new project every time. It never sees anyone else's private graph.</p>
+
+        <h3>Every fact keeps its receipt</h3>
+        <p>Click any line in the dashboard and you get the sentence it came from, who said it, whether it's private or a shared snapshot, and which version of the note it belongs to. If the note gets corrected, the old facts drop out of normal results but stay in the history. If it's forgotten, its facts and anything shared from them go with it.</p>
+      </div>
+
+      <figure class="figure is-wide">
+        <div class="receipt-grid">
+          <div class="shot receipt-shot">
+            <img src="/assets/img/dashboard-receipt.png" width="606" height="1050" alt="The details panel for one relationship: Loop UI dark-mode-first with single accent color, DECIDED_BY Afshal Gulam, the quoted sentence, reported by Afshal Gulam, basis explicit, visibility private, source revision 1, state active, and a button to share it into A school project." loading="lazy" decoding="async">
+          </div>
+          <div class="bracketed"><div class="shot">
+            <div class="shot-bar"><i></i><i></i><i></i><span>Memspace · Ontology</span></div>
+            <img src="/assets/img/ontology-graph.png" width="870" height="450" alt="The Memspace dashboard's ontology graph: an event and a decision linked to the Loop project, the decision decided by Afshal Gulam, a preference for short answers, and Afshal Gulam working on Loop." loading="lazy" decoding="async">
+          </div></div>
+        </div>
+        <figcaption>Left: the details panel after clicking "decided by". Right: part of Afshal's private graph.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <h3>Negatives stay negative</h3>
+        <p>"Pranav can't speak Tamil" is a fact too. Plenty of memory tools drop sentences like that, or worse, keep the positive half. We store the claim with <code>negated: true</code>, and the dashboard draws it in red as "not has skill".</p>
+        <p>The model is told to negate only what the note actually denies. "Doesn't drink coffee" isn't a negated dislike of coffee, and "Lee owes me" never turns into "I don't owe Lee".</p>
+      </div>
+
+      <figure class="figure prose">
+        <div class="panel panel--pad">
+          <p class="extract__quote neg-quote"><span class="who">Pranav, to Dot</span>I can't speak Tamil.</p>
+          <div class="fact neg-fact">
+            <span class="node" data-type="person"><span class="node__type">person</span><span class="node__name">Pranav</span></span>
+            <span class="edge edge--neg">not has skill</span>
+            <span class="node" data-type="topic"><span class="node__type">topic</span><span class="node__name">Tamil</span></span>
+            <span class="chip chip--neg">negated: true</span>
+          </div>
+        </div>
+        <figcaption>Stored as a negated <code>HAS_SKILL</code>, exactly how it shows up in the dashboard graph.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <h3>When nothing fits, it asks</h3>
+        <p>Forty-nine relationships don't cover everything people say. When the extraction can't find one that fits, it can propose a new one instead of forcing the fact into the wrong shape.</p>
+      </div>
+
+      <figure class="figure wide">
+        <div class="flow">
+          <div class="flow__step">
+            <span class="chip chip--prov">proposed</span>
+            <h4>Extraction suggests a new relationship</h4>
+            <p>Say someone writes "Roshan mentors two first-years". Nothing in the schema fits, so the model proposes <code>MENTORS</code>, from person to person. At most three per note.</p>
+          </div>
+          <div class="flow__step">
+            <span class="chip chip--prov">provisional</span>
+            <h4>Usable straight away</h4>
+            <p>The fact is stored and searchable. Later notes reuse <code>MENTORS</code> instead of inventing <code>COACHES</code>; names with the same root, like <code>SPEAKS</code> and <code>CAN_SPEAK</code>, collapse into one.</p>
+          </div>
+          <div class="flow__step">
+            <span class="chip chip--blue">reviewed</span>
+            <h4>A person decides</h4>
+            <div class="outcomes">
+              <div><span class="chip chip--ok">approve</span><span>It becomes a normal relationship.</span></div>
+              <div><span class="chip">merge</span><span>Existing facts are rewritten to an existing one.</span></div>
+              <div><span class="chip chip--neg">reject</span><span>Its facts are retired and unshared.</span></div>
+            </div>
+          </div>
+        </div>
+        <figcaption>To stop the schema sprawling, each person can add five a day and only 100 can wait for review at once. The example is ours, for illustration.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <h3>Teammates meet at one node</h3>
+        <p>Private graphs are never merged. Your "Afshal" and Roshan's "Afshal" are separate nodes, because a matching name isn't proof it's the same person.</p>
+        <p>Shared spaces are different, because there we know exactly who the members are. When a shared fact mentions a person and the name matches exactly one member (their full name, a first name nobody else in the space has, or the author talking about themselves), it points at that member's node. If two members are called Alex, it links to neither.</p>
+      </div>
+
+      <figure class="figure prose">
+        <div class="panel converge bracketed">
+          <div class="converge__notes">
+            <div class="note-card">
+              <small>Roshan's note, shared</small>
+              <p>Afshal is handling the Loop UI.</p>
+              <span class="chip">mentions "Afshal"</span>
+            </div>
+            <div class="note-card">
+              <small>Afshal's note, shared</small>
+              <p>I'm designing the onboarding flow for Loop.</p>
+              <span class="chip">mentions "I"</span>
+            </div>
+          </div>
+          <svg class="converge__wire" viewBox="0 0 100 56" preserveAspectRatio="none" aria-hidden="true">
+            <path class="live" d="M25 0V18Q25 28 35 28H50V56"/>
+            <path class="live" d="M75 0V18Q75 28 65 28H50"/>
+          </svg>
+          <div class="converge__target">
+            <div class="member-node"><span class="dot"></span><div><b>Afshal Gulam</b><small>member of A school project</small></div></div>
+          </div>
+        </div>
+        <figcaption>Two authors, two ways of naming the same person, one node in the space. When someone joins or leaves, the space is re-linked.</figcaption>
+      </figure>
+
+      <figure class="figure is-wide">
+        <div class="bracketed"><div class="shot">
+          <div class="shot-bar"><i></i><i></i><i></i><span>Memspace · Ontology · A school project</span></div>
+          <img src="/assets/img/dashboard-space-ontology.png" width="1456" height="838" alt="The Ontology tab scoped to A school project: Afshal Gulam is shown as a person and member, decided the dark-mode-first decision, wants the demo-ready prototype goal and works on Loop; tasks and an event are part of Loop." loading="lazy" decoding="async">
+        </div></div>
+        <figcaption>The shared space in the dashboard's Ontology tab. Afshal appears once, marked as a member.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <h2 id="falkordb"><span class="chapter-num">05</span>Why it all lives in FalkorDB</h2>
+        <p>Every part of Memspace is one FalkorDB graph: people, memories and their versions, shared spaces, every fact, the search indexes, and even the queue of extraction jobs.</p>
+        <p><a href="https://www.falkordb.com">FalkorDB</a> is a graph database. It stores data as nodes and the relationships between them, you query it with Cypher, and it has full-text and vector search built in. That last part mattered more than we expected. Three things in Memspace can't work without it.</p>
+      </div>
+
+      <div class="figure wide">
+        <div class="three">
+          <div class="thing">
+            <svg viewBox="0 0 300 118" role="img" aria-label="A person reaches a memory through a space they are an active member of. A revoked membership path is cut.">
+              <rect class="box" x="6" y="22" width="70" height="30" rx="8"/><text class="ink" x="41" y="41" text-anchor="middle">You</text>
+              <rect class="box" x="116" y="22" width="70" height="30" rx="8"/><text class="ink" x="151" y="41" text-anchor="middle">Space</text>
+              <rect class="box" x="224" y="22" width="70" height="30" rx="8"/><text class="ink" x="259" y="41" text-anchor="middle">Memory</text>
+              <path class="wire-on" d="M76 37H116"/><text x="96" y="16" text-anchor="middle">MEMBER_OF</text>
+              <path class="wire-on" d="M224 37H186"/><text x="205" y="16" text-anchor="middle">SHARED_IN</text>
+              <rect class="box" x="6" y="78" width="70" height="30" rx="8"/><text x="41" y="97" text-anchor="middle">Removed</text>
+              <path class="wire" d="M76 93H108" stroke-dasharray="3 4"/><path d="M112 87l8 12M120 87l-8 12" stroke="#cf3f57" stroke-width="1.6"/>
+              <text x="132" y="97">active: false, no path</text>
+            </svg>
+            <h4>Permissions are paths</h4>
+            <p>There's no access table. You can read a memory if you wrote it or a live path reaches it through a space. Removing a member flips one edge, and their next read comes back empty.</p>
+          </div>
+          <div class="thing">
+            <svg viewBox="0 0 300 118" role="img" aria-label="A question matches one memory, which connects through the Loop entity to two related memories.">
+              <circle cx="20" cy="59" r="13" fill="#1f5edb"/><text x="20" y="63" text-anchor="middle" fill="#fff" font-size="12" font-weight="600" style="fill:#fff">?</text>
+              <path class="wire-on" d="M33 59H62"/>
+              <rect class="box" x="62" y="44" width="70" height="30" rx="8"/><text class="ink" x="97" y="63" text-anchor="middle">match</text>
+              <path class="wire-on" d="M132 59H160"/>
+              <rect class="box" x="160" y="44" width="56" height="30" rx="15"/><text class="ink" x="188" y="63" text-anchor="middle">Loop</text>
+              <path class="wire-on" d="M216 59H230Q238 59 238 51V33Q238 25 246 25H252"/>
+              <path class="wire-on" d="M216 59H230Q238 59 238 67V85Q238 93 246 93H252"/>
+              <rect class="box" x="252" y="12" width="42" height="26" rx="7"/><text x="273" y="29" text-anchor="middle">note</text>
+              <rect class="box" x="252" y="80" width="42" height="26" rx="7"/><text x="273" y="97" text-anchor="middle">note</text>
+            </svg>
+            <h4>Recall follows relationships</h4>
+            <p>Recall finds keyword matches, then hops one edge through the people, projects and spaces they mention. It returns related notes that share no words with the question, and says what connected them.</p>
+          </div>
+          <div class="thing">
+            <svg viewBox="0 0 300 118" role="img" aria-label="Full-text and vector results are fused, then checked against permissions before being returned.">
+              <rect class="box" x="6" y="14" width="78" height="30" rx="8"/><text class="ink" x="45" y="33" text-anchor="middle">full-text</text>
+              <rect class="box" x="6" y="74" width="78" height="30" rx="8"/><text class="ink" x="45" y="93" text-anchor="middle">vector</text>
+              <path class="wire-on" d="M84 29H100Q108 29 108 37V51Q108 59 116 59H124"/>
+              <path class="wire-on" d="M84 89H100Q108 89 108 81V67Q108 59 116 59H124"/>
+              <rect class="box" x="124" y="44" width="56" height="30" rx="8"/><text class="ink" x="152" y="63" text-anchor="middle">fuse</text>
+              <path class="wire-on" d="M180 59H200"/>
+              <rect class="box" x="200" y="44" width="94" height="30" rx="8"/><text class="ink" x="247" y="63" text-anchor="middle">path check</text>
+            </svg>
+            <h4>Search runs inside the graph</h4>
+            <p>Facts are found by full-text and by meaning (768-dimension vectors in an HNSW index), merged by rank, and every hit is checked against the same permission path before you see it.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>Here is the permission check itself. It's appended to every memory read, and to every hop recall takes:</p>
+        <div class="code">
+          <div class="code__bar"><span>Can this person read this memory?</span><a href="https://github.com/pranavjana/shared-memory-mcp/blob/62ef358/src/memory.ts#L92">src/memory.ts</a></div>
+<pre><code class="language-cypher">MATCH (m:Memory {id:$id})
+OPTIONAL MATCH (m)-[:SHARED_IN {active:true}]-&gt;(:Space)
+               &lt;-[membership:MEMBER_OF {active:true}]-(:Person {id:$user})
 WITH m, count(membership) AS memberships
-WHERE m.deletedAt IS NULL
-  AND (m.owner=$user OR memberships&gt;0)</code></pre>
-<p>Structured knowledge is stricter. A private claim must be owned by the caller, attached to an undeleted source at the current revision, and in <code>active</code> or <code>disputed</code> status. A shared hit walks the other way: <code>Person -MEMBER_OF-&gt; Space &lt;-PUBLISHED_IN- Publication</code>. Publishing copies a frozen projection — excerpt, attribution, entity type and name — and omits private aliases, source memory IDs, and supersession history. Retracting sets <code>Publication.active=false</code>. Retrying a retracted snapshot cannot republish it. Source edits do not mutate a share that already went out.</p>
-<p>Graph expansion is permissioned the same way. Keyword recall seeds authorized memories, then walks <code>ABOUT</code> entities and <code>SHARED_IN</code> spaces — but the same <code>access()</code> clause is applied to every neighbor. One-hop knowledge expansion uses scoped entity IDs, not whole-graph search.</p>
-<h2 id="hybrid-retrieval-without-a-second-index-product">Hybrid retrieval without a second index product</h2>
-<p><code>recall_knowledge</code> reports its own method: FalkorDB full-text plus Gemini vector search, reciprocal-rank fusion, and one-hop scoped entity expansion. Indexes are not global. Each authorized namespace gets its own full-text and vector index on a server-generated label <code>KS_&lt;hash(scope + embedding signature)&gt;</code>. User text never becomes Cypher. Incompatible embedding signatures cannot mix spaces.</p>
-<div class="table-wrap"><table>
-<thead><tr><th>Step</th><th>What FalkorDB does</th></tr></thead>
-<tbody>
-<tr><td>1. Scope</td><td>Personal <code>user:…</code> index, plus one <code>space:…</code> index per membership</td></tr>
-<tr><td>2. Lexical</td><td><code>db.idx.fulltext.queryNodes</code> — TF-IDF-style, cap 201 per scope</td></tr>
-<tr><td>3. Semantic</td><td><code>db.idx.vector.queryNodes</code> — HNSW M=16, cosine distance ≤ 0.32, cap 200/100</td></tr>
-<tr><td>4. Guard</td><td>Re-MATCH <code>INDEXES</code> → claim or publication against current membership</td></tr>
-<tr><td>5. Fallback</td><td>If ANN returns fewer than 20 live hits, exact <code>vec.cosineDistance</code> over the scope</td></tr>
-<tr><td>6. Fuse</td><td>Reciprocal-rank fusion, k=60, then bounded one-hop neighbor fetch</td></tr>
-</tbody>
-</table></div>
-<p>Two implementation details are more interesting than the parameter list. First, this pinned FalkorDB build returns cosine <strong>distance</strong> in a procedure column named <code>score</code> — lower is better — so the query aliases it and converts to similarity only after the cutoff. Second, newer FalkorDB images can reorder <code>UNWIND</code> + <code>MERGE</code> result rows when there is no <code>ORDER BY</code>. <code>record_knowledge</code> therefore returns claim IDs in input order rather than row order, so callers still map <code>claimIds[i]</code> to <code>claims[i]</code>.</p>
-<pre><code>CALL db.idx.vector.queryNodes($label,'embedding',200,vecf32($vector))
-YIELD node, score
-MATCH (node)-[:INDEXES]-&gt;(c:KnowledgeClaim)-[:SUPPORTED_BY]-&gt;(m:Memory)
-WHERE c.owner=$user
-  AND c.sourceRevision=m.revision
-  AND c.status IN ['active','disputed']
-  AND m.deletedAt IS NULL
-  AND score &lt;= 0.32
-RETURN c.payload AS payload, score AS distance
-ORDER BY distance, c.id
-LIMIT 100</code></pre>
-<p>A local ten-question regression compared hybrid claim retrieval with the older text-memory path: 10/10 expected sources in the top five hybrid seeds versus 3/10 for text search. That is a small end-to-end fixture check, not evidence of production accuracy. Graph tests separately prove scope isolation, revoked access, old revisions, retraction, idempotence, and forgetting against a real FalkorDB — using synthetic vectors so CI does not need a model key.</p>
-<h2 id="the-job-queue-is-also-a-graph">The job queue is also a graph</h2>
-<p><code>remember</code> and <code>revise_memory</code> create an <code>OntologyJob</code> in the same write as the source revision. OpenRouter (or Gemini) never talks to FalkorDB. The model receives the source, the live domain schema, and a bounded set of that author's private current claims. It has no tools and no write path. Validated plans are stored on the job node so a crashed write retries the same batch input and stable key.</p>
-<p>A worker checks every five seconds for pending jobs whose <code>nextAt</code> has passed, attempts are under five, and any lease has expired. Claiming a job is a Cypher compare-and-set: status pending, lease empty or stale, then set a 120-second lease and increment attempts. Restarts resume eligible work. Forgetting nulls the plan and marks the job forgotten.</p>
-<p>That is why extraction can survive a Railway restart without Redis Streams, Postgres, or an outbox table. The cost is operational: exhausted jobs stay pending with <code>retryScheduled:false</code> for an operator to inspect inside the intended environment — never by printing the private plan.</p>
-<p>Job lifecycle:</p>
-<ol>
-<li><code>pending</code> → lease 120s</li>
-<li><code>structured</code> / <code>no_supported_claims</code></li>
-<li>backoff, cap 5 attempts</li>
-<li>forgotten with the source</li>
-<li>superseded if the revision moved</li>
-</ol>
-<h2 id="writes-that-survive-retries-reads-that-survive-revocation">Writes that survive retries, reads that survive revocation</h2>
-<p>Almost every mutation is MERGE plus a uniqueness constraint plus a hashed retry key. Revisions are compare-and-swap on <code>Memory.revision</code>. Sharing MERGEs <code>SHARED_IN</code> with <code>active:true</code>. Revocation sets <code>MEMBER_OF.active=false</code>; old invitation links cannot turn it back on. Forgetting does not delete the node. It nulls text, evidence, and payloads, deactivates shares, DETACH DELETEs search documents, and removes orphan <code>Entity</code> records. Minimal IDs remain so a replay cannot resurrect content.</p>
-<p>Reads use <code>graph.roQuery</code>. Writes use <code>graph.query</code>. Parameters are always passed as <code>$params</code> — there is no string-built Cypher from user input. The dashboard graph view is a bounded authorized walk (<code>LIMIT 300</code>), rendered with React Flow only after the Ontology tab is opened.</p>
-<h2 id="how-the-database-actually-runs">How the database actually runs</h2>
-<div class="table-wrap"><table>
-<thead><tr><th>Environment</th><th>FalkorDB setup</th></tr></thead>
-<tbody>
-<tr><td>Local</td><td>Passworded instance on <code>127.0.0.1:16379</code>, distinct graph names</td></tr>
-<tr><td>GitHub CI</td><td>Pinned <code>falkordb/falkordb-server</code> digest, <code>REDIS_ARGS</code> requirepass, port 16379</td></tr>
-<tr><td>Railway sandbox / production</td><td>Private service, no public endpoint, volume at <code>/var/lib/falkordb/data</code>, AOF</td></tr>
-</tbody>
-</table></div>
-<p>The API service interpolates the FalkorDB private domain and password from Railway service references. <code>/health</code> fails closed with 503 if either graph query fails. Sandbox and production keep separate volumes, passwords, and graph names (<code>sandbox_profiles</code> / <code>sandbox_memory</code>). A code rollback does not undo graph writes.</p>
-<h2 id="what-this-choice-bought-and-what-it-did-not">What this choice bought, and what it did not</h2>
-<p>FalkorDB let Memspace keep one permissioned universe: unstructured memories, typed claims, frozen publications, search documents, and background jobs. Hybrid retrieval stays close to the data, with a small fusion layer instead of a distributed query planner. Tests can spin a uniquely named graph and throw it away.</p>
-<p>It did not buy OWL inference, multi-hop query planning, learned reranking, or a transactional outbox for embeddings. Per-scope indexes isolate neighbors at the cost of administrative overhead as spaces grow. The exact-vector fallback is linear in scope size. Similarity is a relevance signal, never a truth confidence. Claims remain attributed assertions; the database will not decide that two people named Alex are the same person.</p>
-<footer>
-      Primary sources in this repo: <code>src/memory.ts</code>, <code>src/knowledge.ts</code>, <code>src/knowledge-search.ts</code>, <code>src/users.ts</code>, <code>src/ontology-extraction.ts</code>, <code>docs/everyday-memory-research.md</code>, and <code>docs/ontology.md</code>.
-    </footer>
-</article></main>
+WHERE m.deletedAt IS NULL AND (m.owner = $user OR memberships &gt; 0)
+RETURN m</code></pre>
+        </div>
+        <p>FalkorDB plans it as an index lookup on the memory followed by two traversals to the reader, so its cost depends on that memory's own connections, not on how big the graph is. Each person and each space also gets its own search index, so someone else's vectors never crowd yours out of the results.</p>
+      </div>
+
+      <figure class="figure prose bracketed">
+        <div class="shot">
+          <div class="shot-bar"><i></i><i></i><i></i><span>FalkorDB Browser · shared_memory_demo</span></div>
+          <img src="/assets/img/falkordb-browser.png" width="1280" height="760" alt="FalkorDB Browser showing a sample Memspace graph: people, their memories, the entities they mention, and a shared space." loading="lazy" decoding="async">
+        </div>
+        <figcaption>A sample graph in FalkorDB Browser. <code>npm run graph:demo</code> in the repo builds it through the product's own code.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <div class="deeper">
+          <a href="/ontology"><b>The full ontology</b><span>All 13 types and 49 relationships, the rules, and how extraction is checked.</span></a>
+          <a href="/falkordb"><b>Inside FalkorDB</b><span>The Cypher queries, the query plans, the job queue, and what bit us.</span></a>
+        </div>
+
+        <h2 id="learned"><span class="chapter-num">06</span>What we learned</h2>
+      </div>
+
+      <div class="figure wide">
+        <div class="learned">
+          <article>
+            <h3>Pushing to assistants didn't work out</h3>
+            <p>Our first version tried to notify teammates' assistants with webhooks. Every host handles them differently, and we pulled it out. Letting each assistant check on its own schedule turned out simpler, and the assistant is the one that knows how it wants to be woken.</p>
+          </article>
+          <article>
+            <h3>Names are a trap</h3>
+            <p>Merging people by name is tempting until you picture two Alexes in one space. In Memspace a name links to a person only inside a space, and only when exactly one member matches.</p>
+          </article>
+          <article>
+            <h3>Make the model quote</h3>
+            <p>Every fact has to carry the exact words it came from, or it's dropped. A quote doesn't prove the model read the sentence right, but it gives you something to check. On our eight synthetic test cases GPT-4.1 mini got all eight, in 0.6 to 7.3 seconds each. Eight cases is a regression check, not a benchmark.</p>
+          </article>
+          <article>
+            <h3>Read the database's fine print</h3>
+            <p>FalkorDB's vector search returns a distance in a column called <code>score</code>, so lower is better. A newer version rejected an inline <code>{id:$space}</code> right after an index call. <a href="/falkordb#bit-us">The full list is here.</a></p>
+          </article>
+          <article>
+            <h3>Some things are still rough</h3>
+            <p>The same project mentioned in four separate notes can show up as four "Loop" nodes, because we'd rather leave them apart than merge on a guess. Recall only expands one hop. Its first step still scans every memory.</p>
+          </article>
+          <article>
+            <h3>Dates are harder than they look</h3>
+            <p>In our demo space, "end of the month" was stored as 23:59 UTC on October 31, a time zone nobody gave. Grok Bot noticed and said so while summarizing the space. The extraction rules tell the model to leave relative dates vague rather than invent a timestamp.</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="prose">
+        <h2 id="try"><span class="chapter-num">07</span>Try it</h2>
+        <p>Memspace is live and the code is open. Sign up, connect whichever assistant you use, and tell it something worth remembering.</p>
+        <ul>
+          <li><a href="https://shared-memory-mcp-production.up.railway.app">Live app</a>, with the MCP endpoint at <code>/mcp</code></li>
+          <li><a href="https://github.com/pranavjana/shared-memory-mcp">Source on GitHub</a>, including the <a href="https://github.com/pranavjana/shared-memory-mcp/blob/main/docs/cypher.md">Cypher queries</a> and a runnable graph demo</li>
+          <li><a href="https://www.youtube.com/watch?v=xcT6GBFVUFw">The demo video</a></li>
+        </ul>
+        <p>We built this for <a href="https://www.falkordb.com">FalkorDB</a>'s Graph Hacks, in the Agent Memory and Coordination track. If you try it and something breaks, open an issue. We'd like to hear about it.</p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <h2>Memspace</h2>
+        <p class="small">One memory for every assistant you use. Built by Afshal Gulam, Pranav Janakiraman and Roshan Premil (team Santology) for Graph Hacks, October 2026.</p>
+      </div>
+      <div>
+        <h2>Read</h2>
+        <ul>
+          <li><a href="/">The story</a></li>
+          <li><a href="/ontology">The ontology</a></li>
+          <li><a href="/falkordb">Inside FalkorDB</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href="https://shared-memory-mcp-production.up.railway.app">Live app</a></li>
+          <li><a href="https://github.com/pranavjana/shared-memory-mcp">GitHub</a></li>
+          <li><a href="https://www.youtube.com/watch?v=xcT6GBFVUFw">Demo video</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

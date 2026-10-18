@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>The Memspace ontology · Memspace</title>
+  <meta name="description" content="Schema 1.2.0 of the Memspace ontology: 13 types, 49 relationships, the rules that keep facts honest, and how a note becomes checked facts.">
+  <link rel="canonical" href="https://memspace-falkordb-blog.vercel.app/ontology">
+  <meta name="theme-color" content="#f4f6f9">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Memspace">
+  <meta property="og:title" content="The Memspace ontology">
+  <meta property="og:description" content="13 types, 49 relationships, and the rules that keep your assistants' facts honest.">
+  <meta property="og:url" content="https://memspace-falkordb-blog.vercel.app/ontology">
+  <meta property="og:image" content="https://memspace-falkordb-blog.vercel.app/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the article</a>
+  <div class="progress" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="/" aria-label="Memspace engineering blog, home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#14161b"/><path d="M9 22V12l7 6 7-6v10" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="12" r="2.6" fill="#6b4cff"/></svg>
+        Memspace
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/">Story</a>
+        <a href="/ontology" aria-current="page">Ontology</a>
+        <a href="/falkordb">FalkorDB</a>
+        <a class="nav-cta nav-hide-sm" href="https://shared-memory-mcp-production.up.railway.app">Try it</a>
+      </nav>
+    </div>
+  </header>
+
+  <nav class="dots" aria-label="On this page">
+    <ol>
+      <li><a href="#rules"><span>Rules</span><i></i></a></li>
+      <li><a href="#pipeline"><span>Note to facts</span><i></i></a></li>
+      <li><a href="#types"><span>Types</span><i></i></a></li>
+      <li><a href="#relationships"><span>Relationships</span><i></i></a></li>
+      <li><a href="#identity"><span>Identity and time</span><i></i></a></li>
+      <li><a href="#sharing"><span>Sharing</span><i></i></a></li>
+      <li><a href="#growing"><span>Growing the schema</span><i></i></a></li>
+      <li><a href="#limits"><span>Limits</span><i></i></a></li>
+    </ol>
+  </nav>
+
+  <main id="main" class="page">
+    <section class="hero" aria-labelledby="title">
+      <div>
+        <h1 id="title">The Memspace ontology</h1>
+        <p class="dek">Schema 1.2.0: 13 types, 49 relationships, and the rules that keep your assistants' facts honest. This is the reference behind <a href="/#ontology">the story</a>.</p>
+        <div class="byline">
+          <span class="avatars" aria-hidden="true"><span>AG</span><span>PJ</span><span>RP</span></span>
+          <span><strong>Team Santology</strong></span>
+          <span>Reference · <time datetime="2026-10-18">October 18, 2026</time></span>
+        </div>
+      </div>
+      <figure class="hero-figure">
+        <div class="bracketed"><div class="shot">
+          <div class="shot-bar"><i></i><i></i><i></i><span>Memspace · Schema</span></div>
+          <img src="/assets/img/schema-panel.png" width="882" height="936" alt="The dashboard's schema panel: Schema 1.2.0, an evidence-backed property graph with no OWL reasoner, listing node types Person, Project, Task, Goal, Event, Decision, Preference, Organization, Place, Topic and Obligation." decoding="async">
+        </div></div>
+        <figcaption class="visually-hidden">The schema panel in the Memspace dashboard.</figcaption>
+      </figure>
+    </section>
+
+    <article class="article">
+      <div class="prose">
+        <p class="lead">Memspace doesn't keep your chats. It keeps facts: typed things, typed relationships between them, and the exact words each fact came from.</p>
+        <p>The schema is defined in one place in the code (<a href="https://github.com/pranavjana/shared-memory-mcp/blob/main/src/ontology.ts"><code>src/ontology.ts</code></a>), validated with Zod, and served live to assistants through the <code>get_ontology</code> tool. The dashboard's Schema panel reads the same registry. It's an evidence-backed property graph. There's no OWL reasoner and no RDF export, and nothing is inferred behind your back.</p>
+
+        <h2 id="rules"><span class="chapter-num">01</span>The rules</h2>
+        <p>These ship with the schema and every assistant sees them. They're short on purpose.</p>
+        <!-- catalog:rules:start -->
+        <ol class="rules">
+          <li>Private by default; membership is not sharing consent.</li>
+          <li>Stable keys are scoped to the author; names do not merge people or projects.</li>
+          <li>In a shared space, a person mentioned in a snapshot is shown as the space member it unambiguously names (the author, or the only member with that full or first name). Private graphs are never merged.</li>
+          <li>Entity properties describe identity. Changing states, deadlines and preferences are claims.</li>
+          <li>A shared claim is a snapshot; source revisions do not silently republish it.</li>
+          <li>Evidence is an attributed excerpt, not independent verification.</li>
+          <li>Forgetting a source removes its claims and publications. Retraction stops future reads.</li>
+          <li>An explicit negation is a claim with negated=true; it is never stored as the affirmative fact.</li>
+          <li>When no relationship fits, extraction may propose a provisional one. It is usable immediately, reused by later extractions, and approved, merged or rejected by an ontology reviewer.</li>
+        </ol>
+        <!-- catalog:rules:end -->
+
+        <h2 id="pipeline"><span class="chapter-num">02</span>From a note to facts</h2>
+        <p>Extraction runs on the server, so assistants don't need to call anything extra. A save looks like this:</p>
+      </div>
+
+      <div class="figure wide">
+        <ol class="steps pipeline">
+          <li class="step"><span class="step__n">1</span><p class="step__title">Save</p><p class="step__body"><code>remember</code> or <code>revise_memory</code> writes the note and its revision. A save never waits on the model.</p></li>
+          <li class="step"><span class="step__n">2</span><p class="step__title">Queue</p><p class="step__body">The same write creates an <code>OntologyJob</code> for that exact revision. The save handler starts it right away.</p></li>
+          <li class="step"><span class="step__n">3</span><p class="step__title">Propose</p><p class="step__body">The model gets the note, the live schema, and up to 300 of the author's own current facts as candidates. No tools, no write access, nobody else's graph.</p></li>
+          <li class="step"><span class="step__n">4</span><p class="step__title">Check</p><p class="step__body">Types, endpoints and allowed values must match the schema, every quote must appear in the note, and the note must still be on that revision.</p></li>
+          <li class="step"><span class="step__n">5</span><p class="step__title">Write</p><p class="step__body">Valid facts are stored against the revision they came from, at most 24 entities and 20 facts per note. Invalid ones are counted and dropped.</p></li>
+          <li class="step"><span class="step__n">6</span><p class="step__title">Index and share</p><p class="step__body">Facts get full-text and vector entries. If the note is already shared into a space, its facts are published there too.</p></li>
+        </ol>
+      </div>
+
+      <div class="prose">
+        <p>A worker checks for unfinished jobs every five seconds. Each job is claimed with a 120-second lease, so two workers never run the same one, and retried with backoff up to five attempts. The lease and the note's revision are checked again after the model answers, so a note that was edited or forgotten mid-extraction never receives stale facts.</p>
+        <p>Every save returns a status your assistant can read back to you:</p>
+        <div class="table-scroll">
+          <table class="catalog">
+            <thead><tr><th scope="col">Status</th><th scope="col">What it means</th></tr></thead>
+            <tbody>
+              <tr><td><code>structured</code></td><td>Facts were written. The receipt lists their IDs.</td></tr>
+              <tr><td><code>no_supported_claims</code></td><td>Nothing in the note fit the schema. The note is kept and shows "Not in ontology".</td></tr>
+              <tr><td><code>pending</code></td><td>Still running, or waiting to retry.</td></tr>
+              <tr><td><code>failed</code></td><td>Five attempts didn't succeed. The owner can choose Retry ontology on the dashboard.</td></tr>
+              <tr><td><code>superseded</code></td><td>The note changed while extraction ran. The newer revision gets its own job.</td></tr>
+              <tr><td><code>not_configured</code></td><td>No extraction model is set up on this deployment.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>What never becomes a fact: hypotheticals, questions, role-play and quoted instructions. Learning something isn't having the skill, an assignment isn't acceptance, a visit isn't residence, and a wish to change jobs isn't new employment. Relative dates stay vague instead of being turned into made-up timestamps.</p>
+
+        <h2 id="types"><span class="chapter-num">03</span>13 types</h2>
+        <p>Each type lists the relationships that can start from it. A type's properties describe identity only; anything that changes, like a status or a deadline, is a fact with its own source.</p>
+      </div>
+
+      <div class="figure wide">
+        <!-- catalog:types:start -->
+        <div class="type-grid">
+          <div class="type-card" data-type="person">
+            <h3>Person</h3>
+            <p>A mentioned person. A name alone never links a platform account.</p>
+            <div class="rels"><span class="chip">works at</span><span class="chip">studies at</span><span class="chip">member of organization</span><span class="chip">knows</span><span class="chip">friend of</span><span class="chip">family of</span><span class="chip">parent of</span><span class="chip">sibling of</span><span class="chip">partner of</span><span class="chip">colleague of</span><span class="chip">reports to</span><span class="chip">works on</span><span class="chip">has skill</span><span class="chip">lives in</span><span class="chip">wants</span><span class="chip">concerned about</span><span class="chip">likes</span><span class="chip">dislikes</span><span class="chip">owns</span><span class="chip">uses</span><span class="chip">practices</span><span class="chip">owes</span><span class="chip">has role</span></div>
+          </div>
+          <div class="type-card" data-type="project">
+            <h3>Project</h3>
+            <p>An ongoing effort containing work, decisions and goals.</p>
+            <div class="rels"><span class="chip">contributes to</span><span class="chip">has status</span></div>
+          </div>
+          <div class="type-card" data-type="task">
+            <h3>Task</h3>
+            <p>An attributed work item. Assignment does not imply acceptance or completion.</p>
+            <div class="rels"><span class="chip">part of</span><span class="chip">assigned to</span><span class="chip">accepted by</span><span class="chip">completed by</span><span class="chip">depends on</span><span class="chip">contributes to</span><span class="chip">has status</span><span class="chip">due at</span></div>
+          </div>
+          <div class="type-card" data-type="goal">
+            <h3>Goal</h3>
+            <p>A desired outcome supported by projects or tasks.</p>
+            <div class="rels"><span class="chip">for context</span><span class="chip">has status</span><span class="chip">due at</span></div>
+          </div>
+          <div class="type-card" data-type="event">
+            <h3>Event</h3>
+            <p>A particular occurrence, distinct from a recurring preference.</p>
+            <div class="rels"><span class="chip">located at</span><span class="chip">has participant</span><span class="chip">organized by</span><span class="chip">starts at</span><span class="chip">ends at</span><span class="chip">part of</span><span class="chip">occurred at</span></div>
+          </div>
+          <div class="type-card" data-type="decision">
+            <h3>Decision</h3>
+            <p>A choice with attribution and supporting reasoning.</p>
+            <div class="rels"><span class="chip">part of</span><span class="chip">decided by</span><span class="chip">applies to</span><span class="chip">has value</span><span class="chip">has reason</span></div>
+          </div>
+          <div class="type-card" data-type="preference">
+            <h3>Preference</h3>
+            <p>A person&#x27;s preference, qualified by context rather than assumed universal.</p>
+            <div class="rels"><span class="chip">preference of</span><span class="chip">applies to</span><span class="chip">has value</span></div>
+          </div>
+          <div class="type-card" data-type="organization">
+            <h3>Organization</h3>
+            <p>An organization mentioned in authorized memory.</p>
+            <div class="rels"><span class="chip">works on</span><span class="chip">located at</span><span class="chip">owns</span><span class="chip">uses</span></div>
+          </div>
+          <div class="type-card" data-type="place">
+            <h3>Place</h3>
+            <p>A place relevant to a memory.</p>
+            <div class="rels"><span class="chip">about</span></div>
+          </div>
+          <div class="type-card" data-type="topic">
+            <h3>Topic</h3>
+            <p>A subject used to connect otherwise related knowledge.</p>
+            <div class="rels"><span class="chip">about</span></div>
+          </div>
+          <div class="type-card" data-type="obligation">
+            <h3>Obligation</h3>
+            <p>A distinct reported debt or repayment obligation; never implies acceptance, a transfer or a calculated balance.</p>
+            <div class="rels"><span class="chip">owed to</span><span class="chip">for context</span><span class="chip">has amount</span><span class="chip">has currency</span><span class="chip">has payment status</span><span class="chip">due at</span></div>
+          </div>
+          <div class="type-card" data-type="item">
+            <h3>Item</h3>
+            <p>A particular possession, product, document or service.</p>
+            <div class="rels"><span class="chip">located at</span></div>
+          </div>
+          <div class="type-card" data-type="routine">
+            <h3>Routine</h3>
+            <p>A recurring activity; separate from any one occurrence.</p>
+            <div class="rels"><span class="chip">for context</span><span class="chip">has frequency</span></div>
+          </div>
+        </div>
+        <!-- catalog:types:end -->
+      </div>
+
+      <div class="prose">
+        <h2 id="relationships"><span class="chapter-num">04</span>49 relationships</h2>
+        <p>Grouped by what they're for. Most link two types. A few hold a value instead, like a status, an amount or a timestamp; those show the value's format on the right.</p>
+      </div>
+
+      <div class="figure wide">
+        <!-- catalog:relationships:start -->
+        <div class="table-scroll">
+          <table class="catalog">
+            <caption>People and relationships <span class="ends">· 8</span><br><span class="ends" style="font-family:var(--sans)">Who knows whom. Direction matters, and none of these grant access to anything.</span></caption>
+            <thead><tr><th scope="col">Relationship</th><th scope="col">From → to</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>KNOWS</code></td><td><span class="ends"><b>person</b> → <b>person</b></span></td><td>Reported acquaintance; directional and never an authorization grant.</td></tr>
+              <tr><td><code>FRIEND_OF</code></td><td><span class="ends"><b>person</b> → <b>person</b></span></td><td>Reported friendship; do not infer mutual claims or sharing consent.</td></tr>
+              <tr><td><code>FAMILY_OF</code></td><td><span class="ends"><b>person</b> → <b>person</b></span></td><td>Reported family connection; use evidence for the exact role.</td></tr>
+              <tr><td><code>PARENT_OF</code></td><td><span class="ends"><b>person</b> → <b>person</b></span></td><td>Reported parent-child relationship; direction matters and does not imply custody or consent.</td></tr>
+              <tr><td><code>SIBLING_OF</code></td><td><span class="ends"><b>person</b> → <b>person</b></span></td><td>Reported sibling relationship; no reverse claim is silently authored.</td></tr>
+              <tr><td><code>PARTNER_OF</code></td><td><span class="ends"><b>person</b> → <b>person</b></span></td><td>Reported personal partnership, qualified by validity and evidence.</td></tr>
+              <tr><td><code>COLLEAGUE_OF</code></td><td><span class="ends"><b>person</b> → <b>person</b></span></td><td>Reported coworker relationship; employment at one organization does not establish this automatically.</td></tr>
+              <tr><td><code>REPORTS_TO</code></td><td><span class="ends"><b>person</b> → <b>person</b></span></td><td>Reported work reporting line, distinct from an application role.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table class="catalog">
+            <caption>Work and learning <span class="ends">· 6</span><br><span class="ends" style="font-family:var(--sans)">Where someone works or studies, what they work on, and what they can do.</span></caption>
+            <thead><tr><th scope="col">Relationship</th><th scope="col">From → to</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>WORKS_AT</code></td><td><span class="ends"><b>person</b> → <b>organization</b></span></td><td>Reported employment, not organization membership or a future job wish.</td></tr>
+              <tr><td><code>STUDIES_AT</code></td><td><span class="ends"><b>person</b> → <b>organization</b></span></td><td>Reported study at an institution.</td></tr>
+              <tr><td><code>MEMBER_OF_ORGANIZATION</code></td><td><span class="ends"><b>person</b> → <b>organization</b></span></td><td>Reported organization membership; does not grant application access.</td></tr>
+              <tr><td><code>WORKS_ON</code></td><td><span class="ends"><b>person / organization</b> → <b>project</b></span></td><td>Reported involvement in an ongoing project; does not imply task acceptance.</td></tr>
+              <tr><td><code>HAS_SKILL</code></td><td><span class="ends"><b>person</b> → <b>topic</b></span></td><td>Reported skill, not a measured proficiency or verified qualification.</td></tr>
+              <tr><td><code>HAS_ROLE</code></td><td><span class="ends"><b>person</b> = string</span></td><td>Reported job or family role in its evidence context; not an application permission.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table class="catalog">
+            <caption>Places and events <span class="ends">· 7</span><br><span class="ends" style="font-family:var(--sans)">Where things are, and what happened when.</span></caption>
+            <thead><tr><th scope="col">Relationship</th><th scope="col">From → to</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>LIVES_IN</code></td><td><span class="ends"><b>person</b> → <b>place</b></span></td><td>Reported residence; visiting a place does not establish residence.</td></tr>
+              <tr><td><code>LOCATED_AT</code></td><td><span class="ends"><b>event / organization / item</b> → <b>place</b></span></td><td>Place associated with this particular event, organization or item.</td></tr>
+              <tr><td><code>HAS_PARTICIPANT</code></td><td><span class="ends"><b>event</b> → <b>person</b></span></td><td>Reported participant in a particular event; no attendance confirmation implied.</td></tr>
+              <tr><td><code>ORGANIZED_BY</code></td><td><span class="ends"><b>event</b> → <b>person / organization</b></span></td><td>Reported event organizer.</td></tr>
+              <tr><td><code>STARTS_AT</code></td><td><span class="ends"><b>event</b> = datetime</span></td><td>Explicit start of a particular event.</td></tr>
+              <tr><td><code>ENDS_AT</code></td><td><span class="ends"><b>event</b> = datetime</span></td><td>Explicit end of a particular event.</td></tr>
+              <tr><td><code>OCCURRED_AT</code></td><td><span class="ends"><b>event</b> = datetime</span></td><td>When an event occurred or is scheduled.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table class="catalog">
+            <caption>Wants and worries <span class="ends">· 3</span><br><span class="ends" style="font-family:var(--sans)">Desired outcomes and concerns, which are never decisions or diagnoses.</span></caption>
+            <thead><tr><th scope="col">Relationship</th><th scope="col">From → to</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>WANTS</code></td><td><span class="ends"><b>person</b> → <b>goal</b></span></td><td>A person&#x27;s desired goal, not a decision, acceptance or completed action.</td></tr>
+              <tr><td><code>CONCERNED_ABOUT</code></td><td><span class="ends"><b>person</b> → <b>goal / topic / event / project / task / obligation</b></span></td><td>A reported concern; does not imply a diagnosis.</td></tr>
+              <tr><td><code>CONTRIBUTES_TO</code></td><td><span class="ends"><b>task / project</b> → <b>goal</b></span></td><td>Work supports a desired outcome.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table class="catalog">
+            <caption>Tasks <span class="ends">· 7</span><br><span class="ends" style="font-family:var(--sans)">Assignment, acceptance and completion are separate facts.</span></caption>
+            <thead><tr><th scope="col">Relationship</th><th scope="col">From → to</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>PART_OF</code></td><td><span class="ends"><b>task / event / decision</b> → <b>project</b></span></td><td>Work or context belongs to a project.</td></tr>
+              <tr><td><code>ASSIGNED_TO</code></td><td><span class="ends"><b>task</b> → <b>person</b></span></td><td>Reported assignment; does not imply acceptance.</td></tr>
+              <tr><td><code>ACCEPTED_BY</code></td><td><span class="ends"><b>task</b> → <b>person</b></span></td><td>An explicit acceptance of a task.</td></tr>
+              <tr><td><code>COMPLETED_BY</code></td><td><span class="ends"><b>task</b> → <b>person</b></span></td><td>Who reportedly completed a task.</td></tr>
+              <tr><td><code>DEPENDS_ON</code></td><td><span class="ends"><b>task</b> → <b>task</b></span></td><td>The subject requires the target; direction matters.</td></tr>
+              <tr><td><code>HAS_STATUS</code></td><td><span class="ends"><b>task / project / goal</b> = string: proposed, accepted, in_progress, blocked, completed, cancelled</span></td><td>An attributed state; a new report does not silently override another author.</td></tr>
+              <tr><td><code>DUE_AT</code></td><td><span class="ends"><b>task / goal / obligation</b> = datetime</span></td><td>A reported deadline with an explicit timezone.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table class="catalog">
+            <caption>Preferences and habits <span class="ends">· 7</span><br><span class="ends" style="font-family:var(--sans)">Preferences keep their context. Habits are recurring, not reminders.</span></caption>
+            <thead><tr><th scope="col">Relationship</th><th scope="col">From → to</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>PREFERENCE_OF</code></td><td><span class="ends"><b>preference</b> → <b>person</b></span></td><td>Whose preference this is.</td></tr>
+              <tr><td><code>APPLIES_TO</code></td><td><span class="ends"><b>preference / decision</b> → <b>project / task / topic / organization</b></span></td><td>Context limits the meaning of a preference or decision.</td></tr>
+              <tr><td><code>HAS_VALUE</code></td><td><span class="ends"><b>preference / decision</b> = string</span></td><td>The contextual content of a preference or choice.</td></tr>
+              <tr><td><code>LIKES</code></td><td><span class="ends"><b>person</b> → <b>item / topic / place / routine</b></span></td><td>Reported liking; preserve context and time.</td></tr>
+              <tr><td><code>DISLIKES</code></td><td><span class="ends"><b>person</b> → <b>item / topic / place / routine</b></span></td><td>Reported dislike; not inferred from a single event.</td></tr>
+              <tr><td><code>PRACTICES</code></td><td><span class="ends"><b>person</b> → <b>routine</b></span></td><td>Reported recurring activity.</td></tr>
+              <tr><td><code>HAS_FREQUENCY</code></td><td><span class="ends"><b>routine</b> = string</span></td><td>Reported recurrence in words; not a scheduler or reminder registration.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table class="catalog">
+            <caption>Decisions <span class="ends">· 2</span><br><span class="ends" style="font-family:var(--sans)">Who chose, and the reason they actually gave.</span></caption>
+            <thead><tr><th scope="col">Relationship</th><th scope="col">From → to</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>DECIDED_BY</code></td><td><span class="ends"><b>decision</b> → <b>person</b></span></td><td>Who reportedly made a choice.</td></tr>
+              <tr><td><code>HAS_REASON</code></td><td><span class="ends"><b>decision</b> = string</span></td><td>The evidence-backed reason for a choice.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table class="catalog">
+            <caption>Things <span class="ends">· 2</span><br><span class="ends" style="font-family:var(--sans)">What someone owns or uses.</span></caption>
+            <thead><tr><th scope="col">Relationship</th><th scope="col">From → to</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>OWNS</code></td><td><span class="ends"><b>person / organization</b> → <b>item</b></span></td><td>Reported possession, not application ownership or access.</td></tr>
+              <tr><td><code>USES</code></td><td><span class="ends"><b>person / organization</b> → <b>item</b></span></td><td>Reported use of an item or service.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table class="catalog">
+            <caption>Money <span class="ends">· 6</span><br><span class="ends" style="font-family:var(--sans)">One debt per obligation. No balances are ever calculated.</span></caption>
+            <thead><tr><th scope="col">Relationship</th><th scope="col">From → to</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>OWES</code></td><td><span class="ends"><b>person</b> → <b>obligation</b></span></td><td>Debtor points to a distinct obligation, not directly to a creditor. Use OWED_TO on that obligation. Separate debts need separate keys.</td></tr>
+              <tr><td><code>OWED_TO</code></td><td><span class="ends"><b>obligation</b> → <b>person</b></span></td><td>The reported creditor of this particular obligation.</td></tr>
+              <tr><td><code>FOR_CONTEXT</code></td><td><span class="ends"><b>obligation / goal / routine</b> → <b>organization / event / item / topic / project</b></span></td><td>Context of a particular obligation, goal or routine.</td></tr>
+              <tr><td><code>HAS_AMOUNT</code></td><td><span class="ends"><b>obligation</b> = decimal</span></td><td>Reported amount, as an exact nonnegative decimal string. Never infer remaining balance or aggregate currencies.</td></tr>
+              <tr><td><code>HAS_CURRENCY</code></td><td><span class="ends"><b>obligation</b> = currency</span></td><td>Explicit ISO 4217 currency code; dollars alone does not establish USD.</td></tr>
+              <tr><td><code>HAS_PAYMENT_STATUS</code></td><td><span class="ends"><b>obligation</b> = string: outstanding, partially_paid, settled, disputed, cancelled</span></td><td>Reported state of a particular obligation; no automatic payment or balance inference.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table class="catalog">
+            <caption>Fallback <span class="ends">· 1</span><br><span class="ends" style="font-family:var(--sans)">Used only when nothing more precise fits.</span></caption>
+            <thead><tr><th scope="col">Relationship</th><th scope="col">From → to</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>ABOUT</code></td><td><span class="ends"><b>any type</b> → <b>any type</b></span></td><td>A deliberately broad topic connection; use a more precise relation when possible.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- catalog:relationships:end -->
+      </div>
+
+      <div class="prose">
+        <h2 id="identity"><span class="chapter-num">05</span>Identity and time</h2>
+        <p>Every entity has a key scoped to its author. Two people using the same name, or even the same key, don't merge. When you say "I" or "me", the model uses a stable <code>self</code> key for you, the author, never for the assistant you're talking to.</p>
+        <p>Reusing an existing entity needs more than a matching name. It has to be the same note's earlier revision, or the new note has to quote context that singles out exactly one existing candidate. Events, tasks and debts are only reused within the same note's history, so two trips or two loans stay separate.</p>
+        <p>Facts carry three kinds of time. <code>recordedAt</code> is when it was captured. Optional <code>validFrom</code> and <code>validUntil</code> say when it applies, with <code>validUntil</code> exclusive. Deadlines and event times need an explicit time zone; if the note didn't give one, the fact isn't written with a guessed one.</p>
+        <p>A correction names the fact it supersedes, and only the same author can supersede their own fact. If someone else reports something different, both stay, each attributed to whoever said it.</p>
+
+        <h2 id="sharing"><span class="chapter-num">06</span>Sharing</h2>
+        <p>There are two ways facts reach a space.</p>
+        <ul>
+          <li><strong>Share one fact.</strong> <code>publish_claim</code> copies a single fact into a space as a frozen snapshot: the assertion, its quote, who said it, and the entities' types and names. Private aliases, the source note's ID and the correction history stay out. Later edits to your note don't silently change what teammates already received.</li>
+          <li><strong>Share a whole note.</strong> <code>share_memory</code> shares the note and publishes its current facts alongside it. When the note is revised or re-extracted those snapshots are replaced, and when you take the note back they're withdrawn. A fact you'd already shared on its own is left alone.</li>
+        </ul>
+        <p>Inside a space, a person mentioned in a shared fact resolves to the member it names: the author themselves, or the only member whose full or first name matches. That member becomes one node, with what the author actually wrote kept as an alias. If the name is ambiguous it links to nobody, and everything is re-linked whenever someone joins or is removed.</p>
+        <p>Reads always need current membership. Retracting stops future reads, and forgetting a note scrubs its facts and anything published from them. Content another assistant already showed someone can't be pulled back.</p>
+      </div>
+
+      <figure class="figure prose">
+        <div class="panel converge bracketed">
+          <div class="converge__notes">
+            <div class="note-card"><small>Pranav's note, shared</small><p>Afshal is leading the Apollo pricing review.</p><span class="chip">mentions "Afshal"</span></div>
+            <div class="note-card"><small>Afshal's note, shared</small><p>Afshal is preparing the Apollo pricing deck.</p><span class="chip">mentions "Afshal Gulam"</span></div>
+          </div>
+          <svg class="converge__wire" viewBox="0 0 100 56" preserveAspectRatio="none" aria-hidden="true">
+            <path class="live" d="M25 0V18Q25 28 35 28H50V56"/>
+            <path class="live" d="M75 0V18Q75 28 65 28H50"/>
+          </svg>
+          <div class="converge__target"><div class="member-node"><span class="dot"></span><div><b>Afshal Gulam</b><small>memberId: demo-afshal</small></div></div></div>
+        </div>
+        <figcaption>From the repo's graph demo: two authors, one <code>KnowledgeEntity</code>. <a href="/falkordb#member-linking">See it in FalkorDB.</a></figcaption>
+      </figure>
+
+      <div class="prose">
+        <h2 id="growing"><span class="chapter-num">07</span>Growing the schema</h2>
+        <p>When no relationship fits something a person actually said, extraction may propose new ones, up to three per note. Each proposal is normalized to an <code>UPPER_SNAKE</code> name between 3 and 40 characters, and anything that reads like an instruction is rejected.</p>
+        <p>Near-duplicates collapse. A proposal reuses an existing relationship with the same root, so <code>CAN_SPEAK</code> becomes <code>SPEAKS</code>, or a broader or narrower one whose types already fit. A provisional relationship is only saved once a valid fact actually uses it. Each author can add five a day, and at most 100 can wait for review. Later extractions see the provisional list, but as data, not instructions.</p>
+        <p>Reviewers are set per deployment with <code>ONTOLOGY_ADMIN_EMAILS</code>. From the dashboard's Schema panel they can:</p>
+        <ul>
+          <li><strong>Approve</strong> it, making it a normal relationship.</li>
+          <li><strong>Merge</strong> it into another relationship whose types fit every existing fact. The facts and their space snapshots are rewritten.</li>
+          <li><strong>Reject</strong> it. Its facts are retired, their snapshots withdrawn and their search entries deleted, and the same root can't be proposed again.</li>
+        </ul>
+        <p>Review shows names, types and counts only. A reviewer never sees anyone's facts or quotes.</p>
+
+        <h2 id="limits"><span class="chapter-num">08</span>Limits we know about</h2>
+        <ul>
+          <li>A quote shows where a fact came from. It doesn't prove the model understood the sentence, and nothing here verifies real-world truth.</li>
+          <li>Matching against existing entities looks at the author's 300 most recent facts and 40 candidates, so older entities can be missed and created again.</li>
+          <li>Names alone never merge. The same project in four notes can appear as four nodes until a later note gives enough context to connect them.</li>
+          <li>Older notes aren't reinterpreted when the schema changes. The owner can retry extraction on notes marked "Not in ontology".</li>
+          <li>Recall expands one hop. There's no multi-hop reasoning, formal inference, or automatic conflict resolution between authors.</li>
+        </ul>
+
+        <div class="deeper">
+          <a href="/"><b>Back to the story</b><span>How Dot, Muse and Grok Bot ended up sharing one memory.</span></a>
+          <a href="/falkordb"><b>Inside FalkorDB</b><span>The queries that store, guard and search all of this.</span></a>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <h2>Memspace</h2>
+        <p class="small">One memory for every assistant you use. Built by Afshal Gulam, Pranav Janakiraman and Roshan Premil (team Santology) for Graph Hacks, October 2026.</p>
+      </div>
+      <div>
+        <h2>Read</h2>
+        <ul>
+          <li><a href="/">The story</a></li>
+          <li><a href="/ontology">The ontology</a></li>
+          <li><a href="/falkordb">Inside FalkorDB</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href="https://shared-memory-mcp-production.up.railway.app">Live app</a></li>
+          <li><a href="https://github.com/pranavjana/shared-memory-mcp">GitHub</a></li>
+          <li><a href="https://www.youtube.com/watch?v=xcT6GBFVUFw">Demo video</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

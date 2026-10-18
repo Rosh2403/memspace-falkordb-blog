@@ -1,0 +1,769 @@
+{
+ "version": "1.2.0",
+ "rules": [
+  "Private by default; membership is not sharing consent.",
+  "Stable keys are scoped to the author; names do not merge people or projects.",
+  "In a shared space, a person mentioned in a snapshot is shown as the space member it unambiguously names (the author, or the only member with that full or first name). Private graphs are never merged.",
+  "Entity properties describe identity. Changing states, deadlines and preferences are claims.",
+  "A shared claim is a snapshot; source revisions do not silently republish it.",
+  "Evidence is an attributed excerpt, not independent verification.",
+  "Forgetting a source removes its claims and publications. Retraction stops future reads.",
+  "An explicit negation is a claim with negated=true; it is never stored as the affirmative fact.",
+  "When no relationship fits, extraction may propose a provisional one. It is usable immediately, reused by later extractions, and approved, merged or rejected by an ontology reviewer."
+ ],
+ "types": [
+  {
+   "id": "person",
+   "name": "Person",
+   "description": "A mentioned person. A name alone never links a platform account."
+  },
+  {
+   "id": "project",
+   "name": "Project",
+   "description": "An ongoing effort containing work, decisions and goals."
+  },
+  {
+   "id": "task",
+   "name": "Task",
+   "description": "An attributed work item. Assignment does not imply acceptance or completion."
+  },
+  {
+   "id": "goal",
+   "name": "Goal",
+   "description": "A desired outcome supported by projects or tasks."
+  },
+  {
+   "id": "event",
+   "name": "Event",
+   "description": "A particular occurrence, distinct from a recurring preference."
+  },
+  {
+   "id": "decision",
+   "name": "Decision",
+   "description": "A choice with attribution and supporting reasoning."
+  },
+  {
+   "id": "preference",
+   "name": "Preference",
+   "description": "A person's preference, qualified by context rather than assumed universal."
+  },
+  {
+   "id": "organization",
+   "name": "Organization",
+   "description": "An organization mentioned in authorized memory."
+  },
+  {
+   "id": "place",
+   "name": "Place",
+   "description": "A place relevant to a memory."
+  },
+  {
+   "id": "topic",
+   "name": "Topic",
+   "description": "A subject used to connect otherwise related knowledge."
+  },
+  {
+   "id": "obligation",
+   "name": "Obligation",
+   "description": "A distinct reported debt or repayment obligation; never implies acceptance, a transfer or a calculated balance."
+  },
+  {
+   "id": "item",
+   "name": "Item",
+   "description": "A particular possession, product, document or service."
+  },
+  {
+   "id": "routine",
+   "name": "Routine",
+   "description": "A recurring activity; separate from any one occurrence."
+  }
+ ],
+ "relationships": [
+  {
+   "id": "WORKS_AT",
+   "description": "Reported employment, not organization membership or a future job wish.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "organization"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "STUDIES_AT",
+   "description": "Reported study at an institution.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "organization"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "MEMBER_OF_ORGANIZATION",
+   "description": "Reported organization membership; does not grant application access.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "organization"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "KNOWS",
+   "description": "Reported acquaintance; directional and never an authorization grant.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "FRIEND_OF",
+   "description": "Reported friendship; do not infer mutual claims or sharing consent.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "FAMILY_OF",
+   "description": "Reported family connection; use evidence for the exact role.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "PARENT_OF",
+   "description": "Reported parent-child relationship; direction matters and does not imply custody or consent.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "SIBLING_OF",
+   "description": "Reported sibling relationship; no reverse claim is silently authored.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "PARTNER_OF",
+   "description": "Reported personal partnership, qualified by validity and evidence.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "COLLEAGUE_OF",
+   "description": "Reported coworker relationship; employment at one organization does not establish this automatically.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "REPORTS_TO",
+   "description": "Reported work reporting line, distinct from an application role.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "WORKS_ON",
+   "description": "Reported involvement in an ongoing project; does not imply task acceptance.",
+   "from": [
+    "person",
+    "organization"
+   ],
+   "to": [
+    "project"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "HAS_SKILL",
+   "description": "Reported skill, not a measured proficiency or verified qualification.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "topic"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "LIVES_IN",
+   "description": "Reported residence; visiting a place does not establish residence.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "place"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "LOCATED_AT",
+   "description": "Place associated with this particular event, organization or item.",
+   "from": [
+    "event",
+    "organization",
+    "item"
+   ],
+   "to": [
+    "place"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "HAS_PARTICIPANT",
+   "description": "Reported participant in a particular event; no attendance confirmation implied.",
+   "from": [
+    "event"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "ORGANIZED_BY",
+   "description": "Reported event organizer.",
+   "from": [
+    "event"
+   ],
+   "to": [
+    "person",
+    "organization"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "WANTS",
+   "description": "A person's desired goal, not a decision, acceptance or completed action.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "goal"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "CONCERNED_ABOUT",
+   "description": "A reported concern; does not imply a diagnosis.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "goal",
+    "topic",
+    "event",
+    "project",
+    "task",
+    "obligation"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "LIKES",
+   "description": "Reported liking; preserve context and time.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "item",
+    "topic",
+    "place",
+    "routine"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "DISLIKES",
+   "description": "Reported dislike; not inferred from a single event.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "item",
+    "topic",
+    "place",
+    "routine"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "OWNS",
+   "description": "Reported possession, not application ownership or access.",
+   "from": [
+    "person",
+    "organization"
+   ],
+   "to": [
+    "item"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "USES",
+   "description": "Reported use of an item or service.",
+   "from": [
+    "person",
+    "organization"
+   ],
+   "to": [
+    "item"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "PRACTICES",
+   "description": "Reported recurring activity.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "routine"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "OWES",
+   "description": "Debtor points to a distinct obligation, not directly to a creditor. Use OWED_TO on that obligation. Separate debts need separate keys.",
+   "from": [
+    "person"
+   ],
+   "to": [
+    "obligation"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "OWED_TO",
+   "description": "The reported creditor of this particular obligation.",
+   "from": [
+    "obligation"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "FOR_CONTEXT",
+   "description": "Context of a particular obligation, goal or routine.",
+   "from": [
+    "obligation",
+    "goal",
+    "routine"
+   ],
+   "to": [
+    "organization",
+    "event",
+    "item",
+    "topic",
+    "project"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "HAS_AMOUNT",
+   "description": "Reported amount, as an exact nonnegative decimal string. Never infer remaining balance or aggregate currencies.",
+   "from": [
+    "obligation"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "decimal",
+    "description": "Exact decimal string, e.g. 15.50. No exponent or currency symbol; up to six fractional places."
+   },
+   "family": null
+  },
+  {
+   "id": "HAS_CURRENCY",
+   "description": "Explicit ISO 4217 currency code; dollars alone does not establish USD.",
+   "from": [
+    "obligation"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "currency",
+    "description": "Three-letter ISO 4217 code, only when explicitly known."
+   },
+   "family": null
+  },
+  {
+   "id": "HAS_PAYMENT_STATUS",
+   "description": "Reported state of a particular obligation; no automatic payment or balance inference.",
+   "from": [
+    "obligation"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "string",
+    "description": "Reported payment state.",
+    "values": [
+     "outstanding",
+     "partially_paid",
+     "settled",
+     "disputed",
+     "cancelled"
+    ]
+   },
+   "family": null
+  },
+  {
+   "id": "HAS_ROLE",
+   "description": "Reported job or family role in its evidence context; not an application permission.",
+   "from": [
+    "person"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "string",
+    "description": "The reported role, e.g. analyst."
+   },
+   "family": null
+  },
+  {
+   "id": "HAS_FREQUENCY",
+   "description": "Reported recurrence in words; not a scheduler or reminder registration.",
+   "from": [
+    "routine"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "string",
+    "description": "Reported recurrence; retain timezone if stated."
+   },
+   "family": null
+  },
+  {
+   "id": "STARTS_AT",
+   "description": "Explicit start of a particular event.",
+   "from": [
+    "event"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "datetime",
+    "description": "ISO timestamp with timezone."
+   },
+   "family": null
+  },
+  {
+   "id": "ENDS_AT",
+   "description": "Explicit end of a particular event.",
+   "from": [
+    "event"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "datetime",
+    "description": "ISO timestamp with timezone."
+   },
+   "family": null
+  },
+  {
+   "id": "PART_OF",
+   "description": "Work or context belongs to a project.",
+   "from": [
+    "task",
+    "event",
+    "decision"
+   ],
+   "to": [
+    "project"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "ASSIGNED_TO",
+   "description": "Reported assignment; does not imply acceptance.",
+   "from": [
+    "task"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "ACCEPTED_BY",
+   "description": "An explicit acceptance of a task.",
+   "from": [
+    "task"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "COMPLETED_BY",
+   "description": "Who reportedly completed a task.",
+   "from": [
+    "task"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "DEPENDS_ON",
+   "description": "The subject requires the target; direction matters.",
+   "from": [
+    "task"
+   ],
+   "to": [
+    "task"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "CONTRIBUTES_TO",
+   "description": "Work supports a desired outcome.",
+   "from": [
+    "task",
+    "project"
+   ],
+   "to": [
+    "goal"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "DECIDED_BY",
+   "description": "Who reportedly made a choice.",
+   "from": [
+    "decision"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "PREFERENCE_OF",
+   "description": "Whose preference this is.",
+   "from": [
+    "preference"
+   ],
+   "to": [
+    "person"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "APPLIES_TO",
+   "description": "Context limits the meaning of a preference or decision.",
+   "from": [
+    "preference",
+    "decision"
+   ],
+   "to": [
+    "project",
+    "task",
+    "topic",
+    "organization"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "ABOUT",
+   "description": "A deliberately broad topic connection; use a more precise relation when possible.",
+   "from": [
+    "person",
+    "project",
+    "task",
+    "goal",
+    "event",
+    "decision",
+    "preference",
+    "organization",
+    "place",
+    "topic",
+    "obligation",
+    "item",
+    "routine"
+   ],
+   "to": [
+    "person",
+    "project",
+    "task",
+    "goal",
+    "event",
+    "decision",
+    "preference",
+    "organization",
+    "place",
+    "topic",
+    "obligation",
+    "item",
+    "routine"
+   ],
+   "value": null,
+   "family": null
+  },
+  {
+   "id": "HAS_STATUS",
+   "description": "An attributed state; a new report does not silently override another author.",
+   "from": [
+    "task",
+    "project",
+    "goal"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "string",
+    "description": "State reported by this claim.",
+    "values": [
+     "proposed",
+     "accepted",
+     "in_progress",
+     "blocked",
+     "completed",
+     "cancelled"
+    ]
+   },
+   "family": null
+  },
+  {
+   "id": "DUE_AT",
+   "description": "A reported deadline with an explicit timezone.",
+   "from": [
+    "task",
+    "goal",
+    "obligation"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "datetime",
+    "description": "Deadline as an ISO timestamp with timezone."
+   },
+   "family": null
+  },
+  {
+   "id": "OCCURRED_AT",
+   "description": "When an event occurred or is scheduled.",
+   "from": [
+    "event"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "datetime",
+    "description": "Event time as an ISO timestamp with timezone."
+   },
+   "family": null
+  },
+  {
+   "id": "HAS_VALUE",
+   "description": "The contextual content of a preference or choice.",
+   "from": [
+    "preference",
+    "decision"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "string",
+    "description": "The stated preference or chosen option."
+   },
+   "family": null
+  },
+  {
+   "id": "HAS_REASON",
+   "description": "The evidence-backed reason for a choice.",
+   "from": [
+    "decision"
+   ],
+   "to": [],
+   "value": {
+    "name": "value",
+    "type": "string",
+    "description": "The stated rationale, not an invented explanation."
+   },
+   "family": null
+  }
+ ]
+}
