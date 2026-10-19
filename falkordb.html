@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Inside FalkorDB · Memspace</title>
+  <meta name="description" content="The Cypher queries Memspace runs on FalkorDB: permission paths, recall hops, in-graph full-text and vector search, idempotent writes, a job queue, and what bit us.">
+  <link rel="canonical" href="https://memspace-falkordb-blog.vercel.app/falkordb">
+  <meta name="theme-color" content="#f4f6f9">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Memspace">
+  <meta property="og:title" content="Inside FalkorDB: the queries behind Memspace">
+  <meta property="og:description" content="Permission paths, recall hops, in-graph search, and the things that bit us.">
+  <meta property="og:url" content="https://memspace-falkordb-blog.vercel.app/falkordb">
+  <meta property="og:image" content="https://memspace-falkordb-blog.vercel.app/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the article</a>
+  <div class="progress" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="/" aria-label="Memspace engineering blog, home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#14161b"/><path d="M9 22V12l7 6 7-6v10" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="12" r="2.6" fill="#6b4cff"/></svg>
+        Memspace
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/">Story</a>
+        <a href="/ontology">Ontology</a>
+        <a href="/falkordb" aria-current="page">FalkorDB</a>
+        <a class="nav-cta nav-hide-sm" href="https://shared-memory-mcp-production.up.railway.app">Try it</a>
+      </nav>
+    </div>
+  </header>
+
+  <nav class="dots" aria-label="On this page">
+    <ol>
+      <li><a href="#model"><span>The model</span><i></i></a></li>
+      <li><a href="#permissions"><span>Permissions</span><i></i></a></li>
+      <li><a href="#recall"><span>Recall</span><i></i></a></li>
+      <li><a href="#search"><span>Search</span><i></i></a></li>
+      <li><a href="#member-linking"><span>Member linking</span><i></i></a></li>
+      <li><a href="#writes"><span>Safe writes</span><i></i></a></li>
+      <li><a href="#queue"><span>Job queue</span><i></i></a></li>
+      <li><a href="#bit-us"><span>What bit us</span><i></i></a></li>
+      <li><a href="#run"><span>Run it</span><i></i></a></li>
+    </ol>
+  </nav>
+
+  <main id="main" class="page">
+    <section class="hero" aria-labelledby="title">
+      <div>
+        <h1 id="title">Inside FalkorDB</h1>
+        <p class="dek">The Cypher queries Memspace depends on, the plans FalkorDB runs for them, and the things that bit us. Every query here is in the repo and runs against a sample graph with one command.</p>
+        <div class="byline">
+          <span class="avatars" aria-hidden="true"><span>AG</span><span>PJ</span><span>RP</span></span>
+          <span><strong>Team Santology</strong></span>
+          <span>Deep dive · <time datetime="2026-10-18">October 18, 2026</time></span>
+        </div>
+      </div>
+      <figure class="hero-figure">
+        <div class="bracketed"><div class="shot">
+          <div class="shot-bar"><i></i><i></i><i></i><span>FalkorDB Browser · shared_memory_demo</span></div>
+          <img src="/assets/img/falkordb-browser.png" width="1280" height="760" alt="FalkorDB Browser in light mode showing the sample Memspace graph: people, their memories, entities and a shared space." decoding="async">
+        </div></div>
+        <figcaption class="visually-hidden">The sample graph in FalkorDB Browser.</figcaption>
+      </figure>
+    </section>
+
+    <article class="article">
+      <div class="prose">
+        <p class="lead">Memspace has no access table, no separate vector database and no job store. All three are the same FalkorDB graph, and this page shows how.</p>
+        <p>Every query is parameterized: user input is never pasted into Cypher. Line links point at <a href="https://github.com/pranavjana/shared-memory-mcp/tree/62ef358">commit 62ef358</a> of the main repo. Many of these are also runnable files in <a href="https://github.com/pranavjana/shared-memory-mcp/tree/main/cypher"><code>cypher/</code></a>.</p>
+
+        <h2 id="model"><span class="chapter-num">01</span>One server, two graphs</h2>
+        <p>One FalkorDB server holds two graphs, picked by name. Account profiles live in <code>FALKORDB_GRAPH</code> as <code>User</code> nodes keyed by Clerk ID. Everything else lives in <code>FALKORDB_MEMORY_GRAPH</code>. Profile details and memory content never share labels.</p>
+        <p>The memory graph has 15 labels, each with a range index and a unique constraint on <code>id</code>, created at startup. These are the ones that matter most:</p>
+      </div>
+
+      <figure class="figure wide">
+        <div class="panel model-panel bracketed">
+          <svg class="schematic model-map" viewBox="0 0 1040 470" role="img" aria-labelledby="model-title model-desc">
+<title id="model-title">The Memspace graph model</title>
+<desc id="model-desc">A person authors memories, which have revisions and are about entities. People are members of spaces and memories are shared in spaces. Knowledge claims are supported by memories, based on revisions, and have subject and object knowledge entities. Publications are derived from claims and published in spaces. Search documents index claims and publications. Ontology jobs are supported by memories. Invitations are for spaces.</desc>
+<defs><marker id="g-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="#1f5edb"/></marker></defs>
+<path d="M220 66H300" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M480 66H560" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M910 40V20H400V40" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M130 92V200" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M330 92V150H160V200" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M420 92V200" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M600 200V160H460V92" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M650 200V92" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M650 252V360" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M480 386H520V226H560" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M480 400H560" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M300 386H260V226H220" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M130 360V252" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M910 360V226H740" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<path d="M910 412V444H390V412" fill="none" stroke="#9db6ea" stroke-width="1.5" marker-end="url(#g-arrow)"/>
+<text class="rel" x="260" y="58" text-anchor="middle">AUTHORED</text>
+<text class="rel" x="520" y="58" text-anchor="middle">HAS_REVISION</text>
+<text class="rel" x="650" y="14" text-anchor="middle">SUPPORTED_BY</text>
+<text class="rel" x="136" y="124" text-anchor="start">MEMBER_OF</text>
+<text class="rel" x="245" y="144" text-anchor="middle">SHARED_IN</text>
+<text class="rel" x="426" y="178" text-anchor="start">ABOUT</text>
+<text class="rel" x="530" y="154" text-anchor="middle">SUPPORTED_BY</text>
+<text class="rel" x="656" y="124" text-anchor="start">BASED_ON</text>
+<text class="rel" x="656" y="312" text-anchor="start">SUBJECT · OBJECT</text>
+<text class="rel" x="526" y="300" text-anchor="start">DERIVED_FROM</text>
+<text class="rel" x="520" y="418" text-anchor="middle">SUBJECT</text>
+<text class="rel" x="266" y="300" text-anchor="start">PUBLISHED_IN</text>
+<text class="rel" x="136" y="312" text-anchor="start">FOR_SPACE</text>
+<text class="rel" x="916" y="300" text-anchor="start">INDEXES</text>
+<text class="rel" x="650" y="460" text-anchor="middle">INDEXES</text>
+<g><rect class="node-box" x="40" y="40" width="180" height="52" rx="11"/><text class="label-ink" x="130" y="71" text-anchor="middle" font-size="13">Person</text></g>
+<g><rect class="node-box" x="300" y="40" width="180" height="52" rx="11"/><text class="label-ink" x="390" y="71" text-anchor="middle" font-size="13">Memory</text></g>
+<g><rect class="node-box" x="560" y="40" width="180" height="52" rx="11"/><text class="label-ink" x="650" y="71" text-anchor="middle" font-size="13">Revision</text></g>
+<g><rect class="node-box" x="820" y="40" width="180" height="52" rx="11"/><text class="label-ink" x="910" y="71" text-anchor="middle" font-size="13">OntologyJob</text></g>
+<g><rect class="node-box" x="40" y="200" width="180" height="52" rx="11"/><text class="label-ink" x="130" y="231" text-anchor="middle" font-size="13">Space</text></g>
+<g><rect class="node-box" x="300" y="200" width="180" height="52" rx="11"/><text class="label-ink" x="390" y="231" text-anchor="middle" font-size="13">Entity</text></g>
+<g><rect class="node-box" x="560" y="200" width="180" height="52" rx="11"/><text class="label-ink" x="650" y="231" text-anchor="middle" font-size="13">KnowledgeClaim</text></g>
+<g><rect class="node-box" x="40" y="360" width="180" height="52" rx="11"/><text class="label-ink" x="130" y="391" text-anchor="middle" font-size="13">Invitation</text></g>
+<g><rect class="node-box" x="300" y="360" width="180" height="52" rx="11"/><text class="label-ink" x="390" y="391" text-anchor="middle" font-size="13">Publication</text></g>
+<g><rect class="node-box" x="560" y="360" width="180" height="52" rx="11"/><text class="label-ink" x="650" y="391" text-anchor="middle" font-size="13">KnowledgeEntity</text></g>
+<g><rect class="node-box" x="820" y="360" width="180" height="52" rx="11"/><text class="label-ink" x="910" y="391" text-anchor="middle" font-size="11.5">KnowledgeSearchDocument</text></g>
+</svg>
+        </div>
+        <ul class="model-list">
+          <li><code>(Person)-[:AUTHORED]-&gt;(Memory)-[:HAS_REVISION]-&gt;(Revision)</code></li>
+          <li><code>(Memory)-[:ABOUT]-&gt;(Entity)</code></li>
+          <li><code>(Person)-[:MEMBER_OF]-&gt;(Space)&lt;-[:SHARED_IN]-(Memory)</code></li>
+          <li><code>(KnowledgeClaim)-[:SUPPORTED_BY]-&gt;(Memory)</code>, <code>-[:BASED_ON]-&gt;(Revision)</code></li>
+          <li><code>(KnowledgeClaim)-[:SUBJECT|OBJECT]-&gt;(KnowledgeEntity)</code></li>
+          <li><code>(Publication)-[:DERIVED_FROM]-&gt;(KnowledgeClaim)</code>, <code>-[:PUBLISHED_IN]-&gt;(Space)</code></li>
+          <li><code>(KnowledgeSearchDocument)-[:INDEXES]-&gt;(KnowledgeClaim|Publication)</code></li>
+          <li><code>(OntologyJob)-[:SUPPORTED_BY]-&gt;(Memory)</code>, <code>(Invitation)-[:FOR_SPACE]-&gt;(Space)</code></li>
+        </ul>
+        <figcaption>The core of the memory graph. Also present: <code>Change</code> records for space activity, <code>Connection</code>, <code>SharingRule</code>, <code>KnowledgeBatch</code> and provisional <code>OntologyPredicate</code> nodes.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <h2 id="permissions"><span class="chapter-num">02</span>Permissions are a query</h2>
+        <p>You can read a memory if you wrote it, or if an active path connects you to it through a space you actively belong to. This clause is appended to every memory read and to every hop recall makes:</p>
+        <div class="code">
+          <div class="code__bar"><span>access()</span><a href="https://github.com/pranavjana/shared-memory-mcp/blob/62ef358/src/memory.ts#L92">src/memory.ts:92</a></div>
+<pre><code class="language-cypher">MATCH (m:Memory {id:$id})
+OPTIONAL MATCH (m)-[:SHARED_IN {active:true}]-&gt;(:Space)
+               &lt;-[membership:MEMBER_OF {active:true}]-(:Person {id:$user})
+WITH m, count(membership) AS memberships
+WHERE m.deletedAt IS NULL AND (m.owner = $user OR memberships &gt; 0)
+RETURN m.id AS id, m.authorName AS author, m.text AS text</code></pre>
+        </div>
+        <p>Here's the plan FalkorDB produces for it, from <code>GRAPH.EXPLAIN</code> on the sample graph. It starts from the <code>id</code> index and walks two edges toward the reader, so the work depends on one memory's connections rather than the size of the graph:</p>
+<pre class="plan">Project
+    Filter
+        Aggregate
+            Apply
+                Filter
+                    Node By Index Scan | (m:Memory)
+                Optional
+                    Filter
+                        Conditional Traverse | (_anon_1)&lt;-(m:Memory)
+                            Filter
+                                Conditional Traverse | (_anon_2)-[membership:MEMBER_OF]-&gt;(_anon_1:Space)
+                                    Argument</pre>
+        <p>Revoking a member sets <code>active:false</code> on one <code>MEMBER_OF</code> edge, and retracting a share does the same on <code>SHARED_IN</code>. Nothing was copied to anyone, so there's nothing to clean up, and the very next read comes back empty. An old invitation link can't switch a revoked edge back on; that takes a new invitation.</p>
+
+        <h2 id="recall"><span class="chapter-num">03</span>Recall: keywords, then one hop</h2>
+        <p>Recall starts with memories you can read that match the words in your question, then hops one edge to bring back related memories, even ones that share no words with it. Every hop re-applies the permission check.</p>
+        <div class="code">
+          <div class="code__bar"><span>Hop through a shared entity</span><a href="https://github.com/pranavjana/shared-memory-mcp/blob/62ef358/src/memory.ts#L254">src/memory.ts:254</a></div>
+<pre><code class="language-cypher">MATCH (seed:Memory)-[:ABOUT]-&gt;(e:Entity)&lt;-[:ABOUT]-(m:Memory)
+WHERE seed.id IN $ids AND NOT m.id IN $ids
+WITH DISTINCT m, e
+OPTIONAL MATCH (m)-[:SHARED_IN {active:true}]-&gt;(:Space)
+               &lt;-[membership:MEMBER_OF {active:true}]-(:Person {id:$user})
+WITH m, e, count(membership) AS memberships
+WHERE m.deletedAt IS NULL AND (m.owner = $user OR memberships &gt; 0)
+RETURN DISTINCT m.id AS id, m.text AS text, e.name AS connectedThrough</code></pre>
+        </div>
+        <p>A second hop runs the same way through <code>SHARED_IN</code>, pulling in what teammates shared next to your results. Each result carries the name of what connected it, so your assistant can say "connected through Loop" instead of guessing why it showed up.</p>
+        <p>In the sample graph, searching "launch" as Pranav returns the launch note, and the entity hop adds "Apollo budget is approved" and the pricing review, neither of which contains the word.</p>
+
+        <h2 id="search"><span class="chapter-num">04</span>Search inside the graph</h2>
+        <p>Structured facts are searched two ways at once, and both happen in FalkorDB. Each person's private facts, and each space's shared facts, get their own label of the form <code>KS_&lt;hash of scope and embedding model&gt;</code> with its own indexes:</p>
+        <div class="code">
+          <div class="code__bar"><span>Per-scope indexes</span><a href="https://github.com/pranavjana/shared-memory-mcp/blob/62ef358/src/knowledge-search.ts#L61">src/knowledge-search.ts:61</a></div>
+<pre><code class="language-cypher">CREATE FULLTEXT INDEX FOR (d:KS_3f7f782c…) ON (d.text)
+CREATE VECTOR INDEX FOR (d:KS_3f7f782c…) ON (d.embedding)
+  OPTIONS {dimension:768, similarityFunction:'cosine', M:16, efConstruction:200, efRuntime:100}</code></pre>
+        </div>
+        <p>Splitting by scope means other people's vectors never take your nearest-neighbour slots, and switching embedding models starts a fresh index instead of mixing vectors. Embeddings are Gemini Embedding 2 at 768 dimensions. A fact whose text hasn't changed is never embedded twice.</p>
+        <div class="code">
+          <div class="code__bar"><span>Vector search, guarded by the same rules</span><a href="https://github.com/pranavjana/shared-memory-mcp/blob/62ef358/src/knowledge-search.ts#L261">src/knowledge-search.ts:261</a></div>
+<pre><code class="language-cypher">CALL db.idx.vector.queryNodes($label, 'embedding', 200, vecf32($vector)) YIELD node, score
+MATCH (node)-[:INDEXES]-&gt;(c:KnowledgeClaim)-[:SUPPORTED_BY]-&gt;(m:Memory)
+WHERE c.owner = $user AND c.sourceRevision = m.revision
+  AND c.status IN ['active','disputed'] AND m.deletedAt IS NULL
+  AND score &lt;= 0.32
+RETURN c.payload AS payload, c.status AS status, score AS distance
+ORDER BY distance, c.id LIMIT 100</code></pre>
+        </div>
+        <p>The full-text side uses <code>db.idx.fulltext.queryNodes</code> with the same guard. The two rankings are merged with reciprocal-rank fusion, where each fact scores the sum of <code>1 / (60 + rank)</code> over the lists it appears in. Then one hop through the top facts' entities brings in neighbours. If fewer than 20 vector hits survive the guard, an exact <code>vec.cosineDistance</code> scan over that scope runs instead, so stale index entries can't crowd out good ones.</p>
+      </div>
+
+      <div class="figure wide">
+        <div class="three">
+          <div class="thing"><h4>768</h4><p>dimensions per vector, cosine, HNSW with M 16, efConstruction 200, efRuntime 100.</p></div>
+          <div class="thing"><h4>0.32</h4><p>maximum cosine distance kept. It's a starting heuristic, not a calibrated threshold.</p></div>
+          <div class="thing"><h4>10 of 10</h4><p>expected sources in the top five on our ten-question check, against 3 of 10 for plain text search. A small fixture, not a benchmark.</p></div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <h2 id="member-linking"><span class="chapter-num">05</span>Member linking, in the graph</h2>
+        <p>When a fact is shared into a space, a person it mentions can resolve to a member of that space. The publication's <code>SUBJECT</code> edge then points at one <code>KnowledgeEntity</code> per member. Here's the sample graph in FalkorDB Browser: Pranav wrote "Afshal is leading the Apollo pricing review", Afshal wrote "Afshal is preparing the Apollo pricing deck", and both facts land on the same node.</p>
+      </div>
+
+      <figure class="figure is-wide">
+        <div class="bracketed"><div class="shot">
+          <div class="shot-bar"><i></i><i></i><i></i><span>FalkorDB Browser · table view</span></div>
+          <img src="/assets/img/falkordb-member-link.png" width="1216" height="262" alt="FalkorDB Browser table: two rows, one authored by Pranav Janakiraman and one by Afshal Gulam, with the same subjectNode id." loading="lazy" decoding="async">
+        </div></div>
+        <figcaption>Two authors, one <code>subjectNode</code>.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Membership changes re-run the linking for the whole space. Each publication whose subject or object moved gets rewired in one query:</p>
+        <div class="code">
+          <div class="code__bar"><span>relinkSpace, abridged</span><a href="https://github.com/pranavjana/shared-memory-mcp/blob/62ef358/src/knowledge.ts#L644">src/knowledge.ts:644</a></div>
+<pre><code class="language-cypher">MATCH (p:Publication {id:$id}) SET p.payload = $payload
+WITH p OPTIONAL MATCH (p)-[r:SUBJECT|OBJECT]-&gt;() DELETE r
+WITH DISTINCT p
+MERGE (subject:KnowledgeEntity {id:$subjectId})
+  ON CREATE SET subject.kind = $subjectType, subject.spaceId = $space
+MERGE (p)-[:SUBJECT]-&gt;(subject)
+// …and the same for OBJECT when the fact has one</code></pre>
+        </div>
+
+        <h2 id="writes"><span class="chapter-num">06</span>Writes that survive retries</h2>
+        <p>Assistants retry. Networks drop. Two assistants sometimes correct the same note at once. Three patterns keep that safe.</p>
+        <p><strong>Idempotent saves.</strong> A memory's ID is a hash of the user and the assistant's idempotency key. A retried <code>remember</code> finds the same node through <code>MERGE</code>. The same key with different content fails the stored request hash and gets a 409 instead of a silent overwrite.</p>
+        <div class="code">
+          <div class="code__bar"><span>remember, abridged</span><a href="https://github.com/pranavjana/shared-memory-mcp/blob/62ef358/src/memory.ts#L205">src/memory.ts:205</a></div>
+<pre><code class="language-cypher">MERGE (p:Person {id:$user}) SET p.name = $name
+MERGE (m:Memory {id:$id})
+  ON CREATE SET m.owner = $user, m.text = $text, m.revision = 1, m.requestHash = $hash
+WITH p, m WHERE m.deletedAt IS NULL AND m.requestHash = $hash
+MERGE (p)-[:AUTHORED]-&gt;(m)
+MERGE (r:Revision {id:$revisionId}) MERGE (m)-[:HAS_REVISION]-&gt;(r)
+MERGE (job:OntologyJob {id:$revisionId})
+  ON CREATE SET job.owner = $user, job.status = 'pending'
+MERGE (job)-[:SUPPORTED_BY]-&gt;(m)</code></pre>
+        </div>
+        <p><strong>Compare-and-swap corrections.</strong> <code>revise_memory</code> only applies if the memory is still at the revision the caller read (<code>WHERE m.revision = $expected</code>). The slower assistant gets a 409 and re-reads. The same query rewires <code>ABOUT</code> edges, queues re-extraction and writes a <code>Change</code> into every space the note is shared in.</p>
+        <p><strong>Exactly-once shares.</strong> Sharing and retracting go through a <code>Change</code> node with an <code>applied</code> flag, so a retried share or retraction takes effect once.</p>
+
+        <h2 id="queue"><span class="chapter-num">07</span>The job queue is a graph too</h2>
+        <p>Extraction jobs are <code>OntologyJob</code> nodes. A worker picks up to three due jobs every five seconds and claims each with a lease in the same query that checks it:</p>
+        <div class="code">
+          <div class="code__bar"><span>Claim a job</span><a href="https://github.com/pranavjana/shared-memory-mcp/blob/62ef358/src/ontology-extraction.ts#L490">src/ontology-extraction.ts:490</a></div>
+<pre><code class="language-cypher">MATCH (m:Memory {id:$memory}) WHERE m.owner = $user AND m.deletedAt IS NULL AND m.revision = $revision
+MERGE (j:OntologyJob {id:$id})
+  ON CREATE SET j.owner = $user, j.revision = $revision, j.status = 'pending', j.attempts = 0, j.nextAt = 0
+MERGE (j)-[:SUPPORTED_BY]-&gt;(m)
+WITH j WHERE j.status = 'pending' AND (j.leaseUntil IS NULL OR j.leaseUntil &lt; $now)
+  AND j.nextAt &lt;= $now AND j.attempts &lt; $max
+SET j.lease = $lease, j.leaseUntil = $until, j.attempts = j.attempts + 1
+RETURN j.plan AS plan, j.attempts AS attempts</code></pre>
+        </div>
+        <p>The lease lasts 120 seconds, so two workers can't process the same job. After the model answers, the lease and the memory's revision are checked again before anything is written. Jobs survive restarts because they're just nodes, and after five failed attempts a job is marked <code>failed</code> for its owner to retry.</p>
+
+        <h2 id="bit-us"><span class="chapter-num">08</span>What bit us</h2>
+      </div>
+
+      <div class="figure wide">
+        <div class="learned">
+          <article>
+            <h3>score is a distance</h3>
+            <p>On the FalkorDB build we pinned, <code>db.idx.vector.queryNodes</code> returns cosine distance in a column named <code>score</code>, so lower is closer. We alias it to <code>distance</code> right away so nobody reads it backwards.</p>
+          </article>
+          <article>
+            <h3>"Variable s not found"</h3>
+            <p>Space search started failing in the sandbox. After <code>CALL db.idx.*.queryNodes</code>, a newer FalkorDB rejected an inline map like <code>(s:Space {id:$space})</code>. The same filter in <code>WHERE</code> works, so all guards after an index call now filter there.</p>
+          </article>
+          <article>
+            <h3>Row order isn't a promise</h3>
+            <p>A newer image returned <code>UNWIND</code> plus <code>MERGE</code> rows in a different order. <code>record_knowledge</code> now returns claim IDs in input order instead of row order, so callers can still match <code>claimIds[i]</code> to <code>claims[i]</code>.</p>
+          </article>
+          <article>
+            <h3>Constraints finish later</h3>
+            <p>Unique constraints are created with <code>GRAPH.CONSTRAINT</code> and become active asynchronously. Startup polls <code>db.constraints()</code> until each is <code>OPERATIONAL</code>. The duplicate-index error also changed wording between versions ("already indexed" became "already exists"), so we match both.</p>
+          </article>
+          <article>
+            <h3>The Browser wants plain values</h3>
+            <p>FalkorDB Browser rejects the <code>CYPHER name=value</code> prefix that the server accepts for parameters. Our graph demo prints a second copy of each query with the values written in, ready to paste.</p>
+          </article>
+          <article>
+            <h3>What we'd love next</h3>
+            <p>Filtering inside the vector index, so we wouldn't need a label per scope. And a choice of property for node captions in the Browser, which would make screenshots of real graphs much easier to read.</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="prose">
+        <h2 id="run"><span class="chapter-num">09</span>Run it yourself</h2>
+        <p>You need Docker and Node 24. This builds a sample graph through the product's own code (four people, one space, six memories, two claims), runs every query above, and prints the results, the <code>GRAPH.EXPLAIN</code> plan and a paste-ready copy for the Browser.</p>
+        <div class="code">
+          <div class="code__bar"><span>Terminal</span><a href="https://github.com/pranavjana/shared-memory-mcp/blob/main/cypher/README.md">cypher/README.md</a></div>
+<pre><code>docker run -d --rm --name falkordb-demo -p 6379:6379 -p 3000:3000 falkordb/falkordb:latest
+git clone https://github.com/pranavjana/shared-memory-mcp &amp;&amp; cd shared-memory-mcp
+npm ci &amp;&amp; npm run graph:demo -- --keep
+# open http://localhost:3000, connect to localhost:6379, pick shared_memory_demo</code></pre>
+        </div>
+        <p>The same results are checked by <code>test/graph-demo.integration.ts</code> on every run of the graph tests, so the query files can't drift from what this page says. The complete list of queries, including the ones not shown here, is in <a href="https://github.com/pranavjana/shared-memory-mcp/blob/main/docs/cypher.md"><code>docs/cypher.md</code></a>.</p>
+
+        <div class="deeper">
+          <a href="/"><b>Back to the story</b><span>How Dot, Muse and Grok Bot ended up sharing one memory.</span></a>
+          <a href="/ontology"><b>The full ontology</b><span>All 13 types, 49 relationships and the rules behind them.</span></a>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <h2>Memspace</h2>
+        <p class="small">One memory for every assistant you use. Built by Afshal Gulam, Pranav Janakiraman and Roshan Premil (team Santology) for Graph Hacks, October 2026.</p>
+      </div>
+      <div>
+        <h2>Read</h2>
+        <ul>
+          <li><a href="/">The story</a></li>
+          <li><a href="/ontology">The ontology</a></li>
+          <li><a href="/falkordb">Inside FalkorDB</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href="https://shared-memory-mcp-production.up.railway.app">Live app</a></li>
+          <li><a href="https://github.com/pranavjana/shared-memory-mcp">GitHub</a></li>
+          <li><a href="https://www.youtube.com/watch?v=xcT6GBFVUFw">Demo video</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
